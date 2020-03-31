@@ -1,4 +1,4 @@
-name: sallj
+name: ar_types
 channels:
   - conda-forge
   - defaults  
