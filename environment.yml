@@ -1,0 +1,32 @@
+name: sallj
+channels:
+  - conda-forge
+  - defaults  
+dependencies:
+  - python=3.7
+  - pip
+ # Core scientific packages
+  - numpy
+  - scipy
+  - scikit-learn
+  - pandas
+  - netcdf4
+  - xarray
+  - dask
+  - bottleneck
+  - metpy
+ # Plotting
+  - matplotlib
+  - cartopy
+  - seaborn
+  - cmocean
+ # Jupyter
+  - jupyter
+  - ipykernel
+  - jupyter_contrib_nbextensions
+ # pip packages
+  - pip:
+    - jupyterthemes
+
+
+      
