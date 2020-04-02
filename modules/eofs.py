@@ -165,7 +165,7 @@ def calc_eofs_svd(z, neofs):
     return evals, evecs, loadings, pcs
 
 
-def exp_variance(evals, neofs=None):
+def pct_variance(evals, neofs=None):
     """Explained variance of EOFs
     
     Calculates the percent of the total variance explained by each EOF.
