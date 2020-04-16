@@ -67,8 +67,78 @@ def spatial_weights(arr_list):
         arr_list[i] = in_array*weights
     return arr_list
 
+def remove_missing_values(X):
+    '''remove missing values from centered, flattened array '''
+    # Find the indices of values that are missing in the whole row
+    nonMissingIndex = np.where(np.logical_not(np.isnan(X[0])))[0]
+    # Remove missing values from the design matrix.
+    dataNoMissing = X[:, nonMissingIndex]
+    return nonMissingIndex, dataNoMissing
 
-def calc_eofs(z):
+def valid_nan(in_array):
+    ''' check to see if missing values were removed properly'''
+    inan = np.isnan(in_array)
+    return (inan.any(axis=0) == inan.all(axis=0)).all()
+
+def standardize_and_flatten_arrays(arr_list, mode='t'):
+    '''standardize variables for EOF and put into single flattened array ''' 
+    nvar = len(arr_list)
+    # Data dimensions
+    ntim, nlat, nlon = arr_list[0].shape
+    npts = nlat*nlon
+    # create empty flat array to put standarized vars in
+    if mode == 't':
+        Xs = np.empty((nvar*npts,ntim))
+    else:
+        Xs = np.empty((ntim, nvar*npts))
+    
+    for i, in_array in enumerate(arr_list):
+        # Extract variable as numpy array
+        var1 = in_array.values
+
+        # Reshape into 2D arrays by flattening the spatial dimension
+        tmp1 = np.reshape(var1, (ntim, npts))
+
+        # Remove missing data
+        tmp1_idx, tmp1_miss = remove_missing_values(tmp1)
+
+        ## Test if the removal of nans was successful
+        print(valid_nan(tmp1_miss))
+        
+        # Data dimensions with missing values removed
+        ntim, npts = tmp1_miss.shape
+        
+        # if t-mode
+        if mode == 't':
+            # transpose to [space x time]
+            X1 = tmp1_miss.T
+            # Standardize by columns
+            x1std = np.std(X1, axis=0)
+            X1s = X1 / x1std
+            # Combine variables into single data matrix Xs
+            Xs[i*npts:(i+1)*npts,:] = X1s
+
+        # if s-mode
+        else:
+            # keep array as [time x space]
+            X1 = tmp1_miss
+           # Standardize by columns
+            x1std = np.std(X1, axis=1)
+            X1s = X1 / x1std
+            # Combine variables into single data matrix Xs
+            Xs[:, i*npts:(i+1)*npts] = X1s
+    
+    print(Xs.shape)
+
+    # Check that column means=0 and std dev=1
+    test = np.mean(np.mean(Xs, axis=0))
+    print("Column means: ", np.round(test,2))
+    test = np.mean(np.std(Xs, axis=0))
+    print("Column std: ", np.round(test,2))
+    
+    return Xs
+
+def calc_eofs(z, mode='t'):
     """Eigenvector decomposition of covariance/correlation matrix
     
     Parameters
@@ -77,7 +147,10 @@ def calc_eofs(z):
         matrix of data values [nxp];
         n = number of observations (rows);
         p = number of variables (columns)
-        
+    mode : str
+        mode which you are running EOF
+        't' for t-mode
+        's' for s-mode
     Returns
     -------
     evals : array_like, float
@@ -86,12 +159,20 @@ def calc_eofs(z):
         pxp matrix of eigenvectors (columns)
     
     """
-    # Compute covariance/correlation matix [R]
-    ntot = z.shape[0]
-    R = np.matmul(z.T,z) / (ntot - 1.)
+    if mode == 't':
+        # Compute covariance/correlation matix [R]
+        ntot = z.shape[0]
+        R = np.matmul(z.T,z) / (ntot - 1.)
 
-    # Eigenvector decomposition of R
-    evals, evecs = np.linalg.eig(R)
+        # Eigenvector decomposition of R
+        evals, evecs = np.linalg.eig(R)
+    else:
+        # Compute covariance/correlation matix [R]
+        ntot = z.shape[1]
+        R = np.matmul(z,z.T) / (ntot - 1.)
+
+        # Eigenvector decomposition of R
+        evals, evecs = np.linalg.eig(R)
 
     return evals, evecs
 

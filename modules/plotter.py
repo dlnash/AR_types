@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+import matplotlib.ticker as mticker
 
 
 def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
@@ -54,6 +55,7 @@ def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
     # If no extent is given, use global extent
     if extent is None:        
         ax.set_global()
+        extent = [-180., 180., -90., 90.]
     # If extent is given, set map extent to lat/lon bounding box
     else:
         ax.set_extent(extent, crs=mapcrs)
@@ -64,27 +66,33 @@ def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
     ax.add_feature(cfeature.COASTLINE, edgecolor='0.4', linewidth=0.8)
 
     ## Tickmarks/Labels
-    # Set xticks if requested
-    if xticks is not None:
-        ax.set_xticks(xticks, crs=mapcrs)      
-        lon_formatter = LongitudeFormatter()
-        ax.xaxis.set_major_formatter(lon_formatter)
-    # Set yticks if requested
-    if yticks is not None:
-        ax.set_yticks(yticks, crs=mapcrs)
-        lat_formatter = LatitudeFormatter()
-        ax.yaxis.set_major_formatter(lat_formatter)
+    ## Add in meridian and parallels
+    gl = ax.gridlines(crs=mapcrs, draw_labels=True,
+                      linewidth=.5, color='black', alpha=0.5, linestyle='--')
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    gl.xlocator = mticker.FixedLocator(np.arange(extent[0], extent[1]+10, 10))
+    gl.ylocator = mticker.FixedLocator(np.arange(extent[2], extent[3]+10, 10))
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+    gl.xlabel_style = {'size': 7, 'color': 'gray'}
+    gl.ylabel_style = {'size': 7, 'color': 'gray'}
+    ## Gridlines
+    # Draw gridlines if requested
+    if (grid == True):
+        gl.xlines = True
+        gl.ylines = True
+    if (grid == False):
+        gl.xlines = False
+        gl.ylines = False
+            
+
     # apply tick parameters    
     ax.tick_params(direction='out', 
                    labelsize=8.5, 
                    length=4, 
                    pad=2, 
                    color='black')
-    
-    ## Gridlines
-    # Draw gridlines if requested
-    if (grid == True):
-        ax.grid(color='k', alpha=0.5, linewidth=0.5, linestyle='--')
     
     return ax
 
