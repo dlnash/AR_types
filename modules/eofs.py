@@ -11,20 +11,42 @@ import numpy as np
 
 
 ## FUNCTIONS
+def center_data(arr_list):
+    ''' Remove the mean of an array along the first dimension.
+    
+    If *True*, the mean along the first axis of *dataset* (the
+    time-mean) will be removed prior to analysis. If *False*,
+    the mean along the first axis will not be removed. Defaults
+    to *True* (mean is removed).
+    The covariance interpretation relies on the input data being
+    anomaly data with a time-mean of 0. Therefore this option
+    should usually be set to *True*. Setting this option to
+    *True* has the useful side effect of propagating missing
+    values along the time dimension, ensuring that a solution
+    can be found even if missing values occur in different
+    locations at different times.
+    '''
+    for i, in_array in enumerate(arr_list):
+        # Compute the mean along the first dimension.
+        mean = in_array.mean(axis=0, skipna=False)
+        # Return the input array with its mean along the first dimension
+        # removed.
+        arr_list[i] = in_array - mean
+    return arr_list
 
-def spatial_weights(latitude):
+def spatial_weights(arr_list):
     """Spatial weights
     
     Returns a 1D array of weights equal to the sqrt of the cos of latitude.
     
     Parameters
     ----------
-    latitude : 1D array, float
-        latitudes in degrees
+    arr_list : list
+        list of variable arrays
   
     Returns
     -------
-    weights : 1D array, float
+    weighted_arrays : list of arrays
         weights equal to the sqrt of the cosine of latitude
     
     Example
@@ -35,12 +57,15 @@ def spatial_weights(latitude):
     era['uwnd_wgt'] = era.uwnd * era.wgts   # apply wgts to data variable
     
     """
-    # convert lats from degrees to radians
-    lat_rad = np.deg2rad(latitude)
-    # compute weights
-    weights = np.sqrt(np.cos(lat_rad))
-    
-    return weights
+    for i, in_array in enumerate(arr_list):
+        latitude = in_array.lat
+        # convert lats from degrees to radians
+        lat_rad = np.deg2rad(latitude)
+        # compute weights
+        weights = np.sqrt(np.cos(lat_rad))
+        # apply spatial weights to array
+        arr_list[i] = in_array*weights
+    return arr_list
 
 
 def calc_eofs(z):
