@@ -123,7 +123,7 @@ def standardize_and_flatten_arrays(arr_list, mode='t'):
             # keep array as [time x space]
             X1 = tmp1_miss
            # Standardize by columns
-            x1std = np.std(X1, axis=1)
+            x1std = np.std(X1, axis=0)
             X1s = X1 / x1std
             # Combine variables into single data matrix Xs
             Xs[:, i*npts:(i+1)*npts] = X1s
@@ -177,7 +177,7 @@ def calc_eofs(z, mode='t'):
     return evals, evecs
 
 
-def calc_pcs(z, evecs, npcs):
+def calc_pcs(z, evecs, npcs, mode='t'):
     """Calculate principal components from eigenvalues and eigenvectors
     
     Parameters
@@ -188,15 +188,20 @@ def calc_pcs(z, evecs, npcs):
         pxk matrix of eigenvectors (columns), where k<=p (may be truncated)
     npcs : scalar, int
         number of pcs to return
-        
+    mode: str
+        mode for pcs - s or t
     Returns
     -------
     pcs : array_like, float
         .........
     
     """   
-    tmp = np.matmul(z, evecs[:,0:npcs])
-    pcs = tmp.T
+    if mode == 't':
+        tmp = np.matmul(z, evecs[:,0:npcs])
+        pcs = tmp.T
+    else:
+        tmp = np.matmul(evecs[0:npcs, :], z)
+        pcs = tmp
     
     return pcs
 
