@@ -80,18 +80,13 @@ def valid_nan(in_array):
     inan = np.isnan(in_array)
     return (inan.any(axis=0) == inan.all(axis=0)).all()
 
-def standardize_and_flatten_arrays(arr_list, mode='t'):
+def standardize_and_flatten_arrays(arr_list, mode='t', dispersion_matrix='cor'):
     '''standardize variables for EOF and put into single flattened array ''' 
+    print('EOF mode: ', mode)
     nvar = len(arr_list)
-    # Data dimensions
+    # Data dimensions for initial flattening
     ntim, nlat, nlon = arr_list[0].shape
-    npts = nlat*nlon
-    # create empty flat array to put standarized vars in
-    if mode == 't':
-        Xs = np.empty((nvar*npts,ntim))
-    else:
-        Xs = np.empty((ntim, nvar*npts))
-    
+    npts = nlat*nlon        
     for i, in_array in enumerate(arr_list):
         # Extract variable as numpy array
         var1 = in_array.values
@@ -103,28 +98,99 @@ def standardize_and_flatten_arrays(arr_list, mode='t'):
         tmp1_idx, tmp1_miss = remove_missing_values(tmp1)
 
         ## Test if the removal of nans was successful
-        print(valid_nan(tmp1_miss))
+        print('Nans removed success is ', valid_nan(tmp1_miss))
         
         # Data dimensions with missing values removed
         ntim, npts = tmp1_miss.shape
         
         # if t-mode
         if mode == 't':
+            # empty flat array to put standarized vars in
+            Xs = np.empty((nvar*npts,ntim))
             # transpose to [space x time]
             X1 = tmp1_miss.T
-            # Standardize by columns
-            x1std = np.std(X1, axis=0)
-            X1s = X1 / x1std
+            if dispersion_matrix == 'cor':
+                # Standardize by columns (if correlation)
+                x1std = np.std(X1, axis=0)
+                X1s = X1 / x1std
+            else: ## dispersion matrix == cov (covariance)
+                X1s = X1
+            
             # Combine variables into single data matrix Xs
             Xs[i*npts:(i+1)*npts,:] = X1s
 
         # if s-mode
         else:
+            # empty flat array to put standarized vars in
+            Xs = np.empty((ntim, nvar*npts))
             # keep array as [time x space]
             X1 = tmp1_miss
-           # Standardize by columns
-            x1std = np.std(X1, axis=0)
-            X1s = X1 / x1std
+            if dispersion_matrix == 'cor':
+                # Standardize by columns (if correlation)
+                x1std = np.std(X1, axis=0)
+                X1s = X1 / x1std
+            else: ## dispersion matrix == cov (covariance)
+                X1s = X1
+            # Combine variables into single data matrix Xs
+            Xs[:, i*npts:(i+1)*npts] = X1s
+    
+    print(Xs.shape)
+
+    # Check that column means=0 and std dev=1
+    test = np.mean(np.mean(Xs, axis=0))
+    print("Column means: ", np.round(test,2))
+    test = np.mean(np.std(Xs, axis=0))
+    print("Column std: ", np.round(test,2))
+    
+    return Xs
+
+def standardize_and_flatten_arrays_nomiss(arr_list, mode='t', dispersion_matrix='cor'):
+    '''standardize variables for EOF and put into single flattened array ''' 
+    print('EOF mode: ', mode)
+    nvar = len(arr_list)
+    # Data dimensions for initial flattening
+    ntim, nlat, nlon = arr_list[0].shape
+    npts = nlat*nlon
+    for i, in_array in enumerate(arr_list):
+        # Extract variable as numpy array
+        var1 = in_array.values
+
+        # Reshape into 2D arrays by flattening the spatial dimension
+        tmp1 = np.reshape(var1, (ntim, npts))
+
+        
+        # Data dimensions with missing values removed
+        ntim, npts = tmp1.shape
+        
+        # if t-mode
+        if mode == 't':
+            # empty flat array to put standarized vars in
+            Xs = np.empty((nvar*npts,ntim))
+            # transpose to [space x time]
+            X1 = tmp1.T
+            
+            if dispersion_matrix == 'cor':
+                # Standardize by columns (if correlation)
+                x1std = np.std(X1, axis=0)
+                X1s = X1 / x1std
+            else: ## dispersion matrix == cov (covariance)
+                X1s = X1
+            
+            # Combine variables into single data matrix Xs
+            Xs[i*npts:(i+1)*npts,:] = X1s
+
+        # if s-mode
+        else:
+            # empty flat array to put standarized vars in
+            Xs = np.empty((ntim, nvar*npts))
+            # keep array as [time x space]
+            X1 = tmp1
+            if dispersion_matrix == 'cor':
+                # Standardize by columns (if correlation)
+                x1std = np.std(X1, axis=0)
+                X1s = X1 / x1std
+            else: ## dispersion matrix == cov (covariance)
+                X1s = X1
             # Combine variables into single data matrix Xs
             Xs[:, i*npts:(i+1)*npts] = X1s
     
@@ -163,18 +229,20 @@ def calc_eofs(z, mode='t'):
         # Compute covariance/correlation matix [R]
         ntot = z.shape[0]
         R = np.matmul(z.T,z) / (ntot - 1.)
-
+        # results in [time x time]
         # Eigenvector decomposition of R
         evals, evecs = np.linalg.eig(R)
     else:
         # Compute covariance/correlation matix [R]
+        ## Should this be??
+        # R = np.matmul(z.T,z) / (ntot - 1.) [space x space]
         ntot = z.shape[1]
         R = np.matmul(z,z.T) / (ntot - 1.)
 
         # Eigenvector decomposition of R
         evals, evecs = np.linalg.eig(R)
-
-    return evals, evecs
+    
+    return R, evals, evecs
 
 
 def calc_pcs(z, evecs, npcs, mode='t'):
@@ -200,7 +268,7 @@ def calc_pcs(z, evecs, npcs, mode='t'):
         tmp = np.matmul(z, evecs[:,0:npcs])
         pcs = tmp.T
     else:
-        tmp = np.matmul(evecs[0:npcs, :], z)
+        tmp = np.matmul(evecs[:, 0:npcs].T, z)
         pcs = tmp
     
     return pcs
