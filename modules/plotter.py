@@ -11,7 +11,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.ticker as mticker
 
 
-def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
+def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, yticks=None, grid=False):
     """
     Creates and returns a background map on which to plot data. 
     
@@ -23,6 +23,9 @@ def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
     ax : 
         plot Axes on which to draw the basemap
     
+    datacrs : 
+        crs that the data comes in (usually ccrs.PlateCarree())
+        
     extent : float
         Set map extent to [lonmin, lonmax, latmin, latmax] 
         Default: None (uses global extent)
@@ -58,7 +61,7 @@ def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
         extent = [-180., 180., -90., 90.]
     # If extent is given, set map extent to lat/lon bounding box
     else:
-        ax.set_extent(extent, crs=mapcrs)
+        ax.set_extent(extent, crs=datacrs)
     
     # Add map features (continents and country borders)
     ax.add_feature(cfeature.LAND, facecolor='0.9')      
@@ -67,16 +70,21 @@ def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
 
     ## Tickmarks/Labels
     ## Add in meridian and parallels
-    gl = ax.gridlines(crs=mapcrs, draw_labels=True,
+    if mapcrs == ccrs.NorthPolarStereo():
+        gl = ax.gridlines(draw_labels=False,
                       linewidth=.5, color='black', alpha=0.5, linestyle='--')
-    gl.xlabels_top = False
-    gl.ylabels_right = False
-    gl.xlocator = mticker.FixedLocator(np.arange(extent[0], extent[1]+10, 10))
-    gl.ylocator = mticker.FixedLocator(np.arange(extent[2], extent[3]+10, 10))
-    gl.xformatter = LONGITUDE_FORMATTER
-    gl.yformatter = LATITUDE_FORMATTER
-    gl.xlabel_style = {'size': 7, 'color': 'gray'}
-    gl.ylabel_style = {'size': 7, 'color': 'gray'}
+    else:
+        gl = ax.gridlines(crs=mapcrs, draw_labels=True,
+                      linewidth=.5, color='black', alpha=0.5, linestyle='--')
+        gl.xlabels_top = False
+        gl.ylabels_right = False
+        gl.xlocator = mticker.FixedLocator(xticks)
+        gl.ylocator = mticker.FixedLocator(yticks)
+        gl.xformatter = LONGITUDE_FORMATTER
+        gl.yformatter = LATITUDE_FORMATTER
+        gl.xlabel_style = {'size': 7, 'color': 'gray'}
+        gl.ylabel_style = {'size': 7, 'color': 'gray'}
+    
     ## Gridlines
     # Draw gridlines if requested
     if (grid == True):
@@ -95,7 +103,6 @@ def draw_basemap(ax, extent=None, xticks=None, yticks=None, grid=False):
                    color='black')
     
     return ax
-
 
 def plot_maxmin_points(lon, lat, data, extrema, nsize, symbol, color='k',
                        plotValue=True, transform=None):
