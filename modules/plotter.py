@@ -73,6 +73,10 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
     if mapcrs == ccrs.NorthPolarStereo():
         gl = ax.gridlines(draw_labels=False,
                       linewidth=.5, color='black', alpha=0.5, linestyle='--')
+    elif mapcrs == ccrs.SouthPolarStereo():
+        gl = ax.gridlines(draw_labels=False,
+                      linewidth=.5, color='black', alpha=0.5, linestyle='--')
+    
     else:
         gl = ax.gridlines(crs=mapcrs, draw_labels=True,
                       linewidth=.5, color='black', alpha=0.5, linestyle='--')
