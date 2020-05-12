@@ -8,7 +8,9 @@ Description: Functions used to calculate and anaylze EOFs
 
 import os, sys
 import numpy as np
+import numpy.ma as ma
 import xarray as xr
+from scipy import stats
 
 
 ## FUNCTIONS
@@ -67,6 +69,29 @@ def flatten_array(arr_list):
         arr_list[i] = np.reshape(var1, [ntim, nlat*nlon])
     return arr_list
 
+def center_data(arr_list):
+    ''' Remove the mean of an array along the first dimension.
+    
+    If *True*, the mean along the first axis of *dataset* (the
+    time-mean) will be removed prior to analysis. If *False*,
+    the mean along the first axis will not be removed. Defaults
+    to *True* (mean is removed).
+    The covariance interpretation relies on the input data being
+    anomaly data with a time-mean of 0. Therefore this option
+    should usually be set to *True*. Setting this option to
+    *True* has the useful side effect of propagating missing
+    values along the time dimension, ensuring that a solution
+    can be found even if missing values occur in different
+    locations at different times.
+    '''
+    for i, in_array in enumerate(arr_list):
+        # Compute the mean along the first dimension [time].
+        time_mean = np.mean(in_array, axis=0)
+        # Return the input array with its mean along the first dimension
+        # removed.
+        arr_list[i] = in_array - time_mean
+    return arr_list
+
 def valid_nan(in_array):
     ''' check to see if missing values were removed properly'''
     inan = np.isnan(in_array)
@@ -106,73 +131,6 @@ def remove_nans(arr_list):
     return arr_list, arr_list_nan
 
 def standardize_arrays(arr_list, mode='t', dispersion_matrix='cor'):
-    '''put variables into single flattened array and then standardize
-     TO DO: change so have remove time-mean function again
-     s-mode does not need a second removal of time-mean 
-     Parameters
-     ----------
-     arr_list : list
-        list of variable arrays
-     
-     mode : str
-         mode of EOF - t or s
-     
-     dispersion_matrix : str
-         type of dispersion matrix - cor or cov
-         
-     Returns
-     -------
-     X : single data matrix with all variables stacked
-        arrays are standardized by the mode and dispersion matrix types
-     
-     ''' 
-    print('EOF mode: ', mode)
-    print('Dispersion Matrix: ', dispersion_matrix)
-    nvar = len(arr_list)
-    
-    for i, var1 in enumerate(arr_list):
-        # Data dimensions with missing values removed
-        ntim, npts = var1.shape
-        
-        # if t-mode
-        if mode == 't':
-            # empty flat array to put variables in
-            Xs = np.empty((nvar*npts,ntim))
-            # transpose to [space x time]
-            X1 = var1.T
-            # Combine variables into single data matrix Xs
-            Xs[i*npts:(i+1)*npts,:] = X1
-        # if s-mode
-        else:
-            # empty flat array to put variables in
-            Xs = np.empty((ntim, nvar*npts))
-            # keep array as [time x space]
-            X1 = var1    
-            # Combine variables into single data matrix Xs
-            Xs[:, i*npts:(i+1)*npts] = X1
-            
-    # Standardize by columns and remove column mean for ALL variables
-    x1mean = np.mean(Xs, axis=0)
-    x1std = np.std(Xs, axis=0)
-    if dispersion_matrix == 'cor':
-        # Standardize by columns (if correlation)
-        # remove column mean
-        X = (Xs - x1mean) / x1std
-    else: ## dispersion matrix == cov (covariance)
-        # remove column mean
-        X = (Xs - x1mean)
-                       
-    print(X.shape)
-
-    # Check that column means=0 and std dev=1
-    test = np.mean(np.mean(X, axis=0))
-    print("Column means: ", np.round(test,2))
-    test = np.mean(np.std(X, axis=0))
-    print("Column std: ", np.round(test,2))
-    
-    return X
-
-def standardize_arrays_new(arr_list, mode='t', dispersion_matrix='cor'):
     '''standardize variables then put in single flattened array
      
      Parameters
@@ -236,7 +194,7 @@ def standardize_arrays_new(arr_list, mode='t', dispersion_matrix='cor'):
             else: ## dispersion matrix == cov (covariance)
                 # remove column mean
                 X = (X1 - x1mean)
-        
+
             # Combine variables into single data matrix Xs
             Xs[:, i*npts:(i+1)*npts] = X
                        
@@ -250,7 +208,7 @@ def standardize_arrays_new(arr_list, mode='t', dispersion_matrix='cor'):
     
     return Xs
 
-def calc_eofs(z, mode='t'):
+def calc_eigs(z, mode='t'):
     """Eigenvector decomposition of covariance/correlation matrix
     
     Parameters
@@ -292,7 +250,7 @@ def calc_eofs(z, mode='t'):
 
 
 def calc_pcs(z, evecs, npcs, mode='t'):
-    """Calculate principal components from eigenvalues and eigenvectors
+    """Calculate principal components time series
     
     Parameters
     ----------
@@ -319,6 +277,33 @@ def calc_pcs(z, evecs, npcs, mode='t'):
     
     return pcs
 
+def calc_eofs(z, evecs, neofs, mode='t'):
+    """Calculate EOFs (spatial loadings) by projecting eigenvectors onto standardized data matrix
+    
+    Parameters
+    ----------
+    z : array_like, float
+        standardized data matrix
+    evecs : array_like, float
+        pxk matrix of eigenvectors (columns), where k<=p (may be truncated)
+    neofs : scalar, int
+        number of eofs to return
+    mode: str
+        mode for eof - s or t
+    Returns
+    -------
+    eof : array_like, float
+        .........
+    
+    """   
+    if mode == 't':
+        tmp = np.matmul(z, evecs[:,0:neofs])
+        eof = tmp.T
+    else:
+        tmp = np.matmul(evecs[:, 0:neofs].T, z)
+        eof = tmp
+    
+    return eof
 
 def loadings(evals, evecs, neofs):
     """Calculate loadings matrix
@@ -449,3 +434,90 @@ def north_test(evals, n):
 #     pcs_std = tmp.T
     
 #     return pcs_std
+
+import numpy.ma as ma
+
+def correlation_map(pcs, var_list):
+    """Correlation maps for a set of PCs and a spatial-temporal field.
+    Given an array where the columns are PCs and an array containing spatial-temporal
+    data where the first dimension represents time, one correlation map
+    per PC is computed.
+    The field must have the same temporal dimension as the PCs. Any
+    number of spatial dimensions (including zero) are allowed in the
+    field and there can be any number of PCs.
+    **Arguments:**
+    *pcs*
+        PCs as the columns of an array.
+    *var_list*
+        list of Spatial-temporal fields with time as the first dimension.
+    
+    **Returns:**
+    *correlation_maps*
+        An array with the correlation maps reshaped to the data array size.
+
+    """
+    ntime, neofs = pcs.shape
+    ntim, nlat, nlon = var_list[0].shape
+    
+    ## Flatten data to [time x space]
+    flat_var = flatten_array(var_list)
+    
+    field = flat_var[0]
+    # remove the mean along the leading dimension.
+    pcs_cent = pcs - pcs.mean(axis=0)
+    field_cent = field - field.mean(axis=0)
+
+    # Compute the standard deviation of the PCs and the fields along the time
+    # dimension (the leading dimension).
+    pcs_std = pcs_cent.std(axis=0)
+    field_std = field_cent.std(axis=0)
+    # Set the divisor.
+    div = np.float64(pcs_cent.shape[0])
+    # Compute the correlation map.
+    cor = ma.dot(field_cent.T, pcs_cent).T / div
+    cor = ma.masked_invalid(cor)
+    # divide by std dev of pc * std dev of field
+    cor /= ma.outer(pcs_std, field_std)
+    
+    # Reshape correlation results
+    # Reshape spatial dim back to 2D map
+    cormap = np.reshape(cor, (neofs,nlat,nlon))
+    
+    return cormap
+
+
+def pearsonr_map(pcs, var_list):
+    """Correlation maps for a set of PCs and a spatial-temporal field.
+    Given an array where the columns are PCs and an array containing spatial-temporal
+    data where the first dimension represents time, one correlation map
+    per PC is computed.
+    The field must have the same temporal dimension as the PCs. Any
+    number of spatial dimensions (including zero) are allowed in the
+    field and there can be any number of PCs.
+    **Arguments:**
+    *pcs*
+        PCs as the columns of an array.
+    *var_list*
+        list of Spatial-temporal fields with time as the first dimension.
+    
+    **Returns:**
+    *correlation_maps*
+        An array with the correlation maps reshaped to the data array size.
+
+    """
+    ntime, neofs = pcs.shape
+    ntim, nlat, nlon = var_list[0].shape
+    
+    ## Flatten data to [time x space]
+    flat_var = flatten_array(var_list)
+    
+    field = flat_var[0]
+    
+    cor, pval = stats.pearsonr(pcs, field)
+    
+    # Reshape correlation results
+    # Reshape spatial dim back to 2D map
+    cormap = np.reshape(cor, (neofs,nlat,nlon))
+    pmap = np.reshape(pval, (neofs,nlat,nlon))
+    
+    return cormap, pmap

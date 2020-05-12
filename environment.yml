@@ -24,6 +24,8 @@ dependencies:
   - jupyter
   - ipykernel
   - jupyter_contrib_nbextensions
+  - jupyter-server-proxy
+  - ipywidgets
  # pip packages
   - pip:
     - jupyterthemes
