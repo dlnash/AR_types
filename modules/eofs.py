@@ -521,3 +521,54 @@ def pearsonr_map(pcs, var_list):
     pmap = np.reshape(pval, (neofs,nlat,nlon))
     
     return cormap, pmap
+
+def covariance_gufunc(x, y):
+    return ((x - x.mean(axis=-1, keepdims=True))
+            * (y - y.mean(axis=-1, keepdims=True))).mean(axis=-1)
+
+def pearson_correlation_gufunc(x, y):
+    return covariance_gufunc(x, y) / (x.std(axis=-1) * y.std(axis=-1))
+
+def t_sf(tstats, df):
+    '''Wrapped stats.t.sf to calculate pvalue over t-statistic in xr.dataset form'''
+    return xr.apply_ufunc(stats.t.sf,
+                           tstats,
+#                        input_core_dims=[[dim]],
+                       dask='allowed',
+                         kwargs={'df': df, 'loc': 0, 'scale': 1})
+
+def pearson_correlation(x, y, dim):
+    return xr.apply_ufunc(
+        pearson_correlation_gufunc, x, y,
+        input_core_dims=[[dim], [dim]],
+        dask='allowed'
+#         , output_core_dims=[['lag'], ['lag']]
+    )
+
+def correlation_pvalue(x, y, lagx=0, lagy=0, n=None):
+    # Ensure that the data are properly alinged to each other. 
+    x,y = xr.align(x,y)
+    
+    # Add lag information if any, and shift the data accordingly
+    if lagx!=0:
+        #If x lags y by 1, x must be shifted 1 step backwards. 
+        #But as the 'zero-th' value is nonexistant, xr assigns it as invalid (nan). Hence it needs to be dropped
+        x   = x.shift(time = -lagx).dropna(dim='time')
+        #Next important step is to re-align the two datasets so that y adjusts to the changed coordinates of x
+        x,y = xr.align(x,y)
+
+    if lagy!=0:
+        y   = y.shift(time = -lagy).dropna(dim='time')
+        x,y = xr.align(x,y)
+    # degrees of freedom set to length of x if not specified
+    if n is None:
+        n=x.shape[0]
+        
+    # Calculate Pearson's Correlation Coefficient
+    cor = pearson_correlation(x, y, dim='time')
+    
+    # Calculate t-statistic and p-value
+    tstats = cor*np.sqrt(n-2)/np.sqrt(1-cor**2)
+    pval   = t_sf(np.abs(tstats), df=n-2)*2
+
+    return cor, pval, tstats
