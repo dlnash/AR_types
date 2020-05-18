@@ -1,6 +1,6 @@
 """
 Filename:    eofs.py
-Author:      Tessa Montini, tmontini@ucsb.edu
+Author:      Tessa Montini, tmontini@ucsb.edu & Deanna Nash, dlnash@ucsb.edu
 Description: Functions used to calculate and anaylze EOFs
 """
 
@@ -208,9 +208,13 @@ def standardize_arrays(arr_list, mode='t', dispersion_matrix='cor'):
     
     return Xs
 
+def calc_euclidean_distances(X, Y):
+    dists = -2 * np.dot(X, Y.T) + np.sum(Y**2,    axis=1) + np.sum(X**2, axis=1)[:, np.newaxis]
+    return np.sqrt(dists)
+
 def calc_eigs(z, mode='t'):
     """Eigenvector decomposition of covariance/correlation matrix
-    
+    TO DO: write in check for larger dimension for s-mode
     Parameters
     ----------
     z : array_like, float
@@ -229,28 +233,37 @@ def calc_eigs(z, mode='t'):
         pxp matrix of eigenvectors (columns)
     
     """
-    if mode == 't':
+    if mode == 't': # z = [space, time]
         # Compute covariance/correlation matix [R]
         ntot = z.shape[0]
         R = np.matmul(z.T,z) / (ntot - 1.)
         # results in [time x time]
         # Eigenvector decomposition of R
         evals, evecs = np.linalg.eig(R)
-    else:
+    else: # z = [time, space]
         # Compute covariance/correlation matix [R]
-        ## Should this be??
-        # R = np.matmul(z.T,z) / (ntot - 1.) [space x space]
         ntot = z.shape[1]
+        ## This can be either/or depending which dim is larger
+        # R = np.matmul(z.T,z) / (ntot - 1.) 
+        # results in [space x space]
         R = np.matmul(z,z.T) / (ntot - 1.)
+        # results in [time x time]
 
         # Eigenvector decomposition of R
         evals, evecs = np.linalg.eig(R)
+        ## eigenvectors [eofs, eigenvectors]
+        ## variable in columns
+        
+        # if using second option, can calc meaningful eigenvectors
+        z_dot_evecs = np.matmul(z.T, evecs)
+        norm = calc_euclidean_distances(z, evecs)
+        evecs = z_dot_evecs/norm
     
     return R, evals, evecs
 
 
 def calc_pcs(z, evecs, npcs, mode='t'):
-    """Calculate principal components time series
+    """Calculate principal components time series coefficients
     
     Parameters
     ----------
@@ -269,10 +282,12 @@ def calc_pcs(z, evecs, npcs, mode='t'):
     
     """   
     if mode == 't':
-        tmp = np.matmul(z, evecs[:,0:npcs])
-        pcs = tmp.T
+        # eigenvectors are already in time coefficients
+        # evecs = [time, npcs]
+        pcs = evecs[:, 0:npcs]
     else:
-        tmp = np.matmul(evecs[:, 0:npcs].T, z)
+        # [time, space]*[space, npcs] = [time, npcs]
+        tmp = np.matmul(z, evecs[:, 0:npcs])
         pcs = tmp
     
     return pcs
@@ -297,11 +312,13 @@ def calc_eofs(z, evecs, neofs, mode='t'):
     
     """   
     if mode == 't':
+        # [space, time][time, neofs] = [space, neofs]
         tmp = np.matmul(z, evecs[:,0:neofs])
         eof = tmp.T
     else:
-        tmp = np.matmul(evecs[:, 0:neofs].T, z)
-        eof = tmp
+        # eigenvectors are already in spatial mode
+        # evecs = [space, neofs]
+        eof = evecs[:,0:neofs]
     
     return eof
 
@@ -356,10 +373,14 @@ def calc_eofs_svd(z, neofs):
     
     """    
     # Singular Value Decomposition of z
+    # U is matrix eigenvectors for zz'
+    # Vt is matrix eigenvectors for z'z
+    # S is matrix with square root of eigenvalues on the diagonal                                           
     U, S, Vt = np.linalg.svd(z)
     ntot = z.shape[0]
 
     # Compute eigenvalues
+    # square values and normalize by deg of freedom                                            
     evals = S**2.0 / (ntot-1)
     
     # Compute eigenvectors
@@ -435,10 +456,75 @@ def north_test(evals, n):
     
 #     return pcs_std
 
-import numpy.ma as ma
+
+def covariance_gufunc(x, y):
+    return ((x - x.mean(axis=-1, keepdims=True))
+            * (y - y.mean(axis=-1, keepdims=True))).mean(axis=-1)
+
+def pearson_correlation_gufunc(x, y):
+    return covariance_gufunc(x, y) / (x.std(axis=-1) * y.std(axis=-1))
+
+def t_sf(tstats, df):
+    '''Wrapped stats.t.sf to calculate pvalue over t-statistic in xr.dataset form'''
+    return xr.apply_ufunc(stats.t.sf,
+                          tstats,
+                          dask='allowed',
+                          kwargs={'df': df, 'loc': 0, 'scale': 1})
+
+def pearson_correlation(x, y, dim):
+    return xr.apply_ufunc(
+        pearson_correlation_gufunc, x, y,
+        input_core_dims=[[dim], [dim]],
+        dask='allowed')
+
+def correlation_pvalue(x, y, lagx=0, lagy=0, n=None):
+    """Correlation, pvalue and t-statistic maps for an xarray dataset of (singular) PC/EOF and a dataset object with spatial-temporal variables.
+    
+    **Arguments:**
+    *x*
+        xarray dataset with PC as a variable.
+    *y*
+        xarray dataset with different spatial-temporal variables. Note: you can have as many variables as you want
+    
+    **Returns:**
+    *cor*
+        xarray dataset with correlations for different input variables
+    *pval*
+        xarray dataset with pvalues for correlations for different input variables. Note: I need to check this - I was getting super weird pvalues.
+    *tstats*
+        xarray dataset with t-statistics for correlations for different variables. I would recommend using this to test for significant and compare to a t-table for critical stat.
+
+    """
+    # Ensure that the data are properly alinged to each other. 
+    x,y = xr.align(x,y)
+    
+    # Add lag information if any, and shift the data accordingly
+    if lagx!=0:
+        #If x lags y by 1, x must be shifted 1 step backwards. 
+        #But as the 'zero-th' value is nonexistant, xr assigns it as invalid (nan). Hence it needs to be dropped
+        x   = x.shift(time = -lagx).dropna(dim='time')
+        #Next important step is to re-align the two datasets so that y adjusts to the changed coordinates of x
+        x,y = xr.align(x,y)
+
+    if lagy!=0:
+        y   = y.shift(time = -lagy).dropna(dim='time')
+        x,y = xr.align(x,y)
+    # degrees of freedom set to length of x if not specified
+    if n is None:
+        n=x.shape[0]
+        
+    # Calculate Pearson's Correlation Coefficient
+    cor = pearson_correlation(x, y, dim='time')
+    
+    # Calculate t-statistic and p-value
+    tstats = cor*np.sqrt(n-2)/np.sqrt(1-cor**2)
+    pval   = t_sf(np.abs(tstats), df=n-2)*2
+
+    return cor, pval, tstats
 
 def correlation_map(pcs, var_list):
-    """Correlation maps for a set of PCs and a spatial-temporal field.
+    """DIFFERENT METHOD FOR CORRELATION MAPS - NO PVALUE
+    Correlation maps for a set of PCs and a spatial-temporal field.
     Given an array where the columns are PCs and an array containing spatial-temporal
     data where the first dimension represents time, one correlation map
     per PC is computed.
@@ -484,91 +570,3 @@ def correlation_map(pcs, var_list):
     cormap = np.reshape(cor, (neofs,nlat,nlon))
     
     return cormap
-
-
-def pearsonr_map(pcs, var_list):
-    """Correlation maps for a set of PCs and a spatial-temporal field.
-    Given an array where the columns are PCs and an array containing spatial-temporal
-    data where the first dimension represents time, one correlation map
-    per PC is computed.
-    The field must have the same temporal dimension as the PCs. Any
-    number of spatial dimensions (including zero) are allowed in the
-    field and there can be any number of PCs.
-    **Arguments:**
-    *pcs*
-        PCs as the columns of an array.
-    *var_list*
-        list of Spatial-temporal fields with time as the first dimension.
-    
-    **Returns:**
-    *correlation_maps*
-        An array with the correlation maps reshaped to the data array size.
-
-    """
-    ntime, neofs = pcs.shape
-    ntim, nlat, nlon = var_list[0].shape
-    
-    ## Flatten data to [time x space]
-    flat_var = flatten_array(var_list)
-    
-    field = flat_var[0]
-    
-    cor, pval = stats.pearsonr(pcs, field)
-    
-    # Reshape correlation results
-    # Reshape spatial dim back to 2D map
-    cormap = np.reshape(cor, (neofs,nlat,nlon))
-    pmap = np.reshape(pval, (neofs,nlat,nlon))
-    
-    return cormap, pmap
-
-def covariance_gufunc(x, y):
-    return ((x - x.mean(axis=-1, keepdims=True))
-            * (y - y.mean(axis=-1, keepdims=True))).mean(axis=-1)
-
-def pearson_correlation_gufunc(x, y):
-    return covariance_gufunc(x, y) / (x.std(axis=-1) * y.std(axis=-1))
-
-def t_sf(tstats, df):
-    '''Wrapped stats.t.sf to calculate pvalue over t-statistic in xr.dataset form'''
-    return xr.apply_ufunc(stats.t.sf,
-                           tstats,
-#                        input_core_dims=[[dim]],
-                       dask='allowed',
-                         kwargs={'df': df, 'loc': 0, 'scale': 1})
-
-def pearson_correlation(x, y, dim):
-    return xr.apply_ufunc(
-        pearson_correlation_gufunc, x, y,
-        input_core_dims=[[dim], [dim]],
-        dask='allowed'
-#         , output_core_dims=[['lag'], ['lag']]
-    )
-
-def correlation_pvalue(x, y, lagx=0, lagy=0, n=None):
-    # Ensure that the data are properly alinged to each other. 
-    x,y = xr.align(x,y)
-    
-    # Add lag information if any, and shift the data accordingly
-    if lagx!=0:
-        #If x lags y by 1, x must be shifted 1 step backwards. 
-        #But as the 'zero-th' value is nonexistant, xr assigns it as invalid (nan). Hence it needs to be dropped
-        x   = x.shift(time = -lagx).dropna(dim='time')
-        #Next important step is to re-align the two datasets so that y adjusts to the changed coordinates of x
-        x,y = xr.align(x,y)
-
-    if lagy!=0:
-        y   = y.shift(time = -lagy).dropna(dim='time')
-        x,y = xr.align(x,y)
-    # degrees of freedom set to length of x if not specified
-    if n is None:
-        n=x.shape[0]
-        
-    # Calculate Pearson's Correlation Coefficient
-    cor = pearson_correlation(x, y, dim='time')
-    
-    # Calculate t-statistic and p-value
-    tstats = cor*np.sqrt(n-2)/np.sqrt(1-cor**2)
-    pval   = t_sf(np.abs(tstats), df=n-2)*2
-
-    return cor, pval, tstats
