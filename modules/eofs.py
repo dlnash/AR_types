@@ -210,7 +210,7 @@ def standardize_arrays(arr_list, mode='t', dispersion_matrix='cor'):
 
 def calc_euclidean_distances(X, Y):
     dists = -2 * np.dot(X, Y.T) + np.sum(Y**2,    axis=1) + np.sum(X**2, axis=1)[:, np.newaxis]
-    return np.sqrt(dists)
+    return dists
 
 def calc_eigs(z, mode='t'):
     """Eigenvector decomposition of covariance/correlation matrix
@@ -256,13 +256,39 @@ def calc_eigs(z, mode='t'):
         
         # if using second option, can calc meaningful eigenvectors
         z_dot_evecs = np.matmul(z.T, evecs)
-        norm = calc_euclidean_distances(z, evecs)
+        # norm is computed to ensure resulting eigenvectors have unit length
+        norm = np.sqrt(z_dot_evecs)
         evecs = z_dot_evecs/norm
     
     return R, evals, evecs
 
+def loadings(evals, evecs, neofs):
+    """Calculate loadings matrix
+    This gives our eigenvectors the amplitude corresponding to
+    the amplitude in the data set that they represent
+    
+    Parameters
+    ----------
+    evals : array_like, float
+        Vector of eignvalues
+    evecs : array_like, float
+        Matrix of eigenvectors
+    neofs : scalar, int
+        number of eofs to calculate loadings for
+             
+    Returns
+    -------
+    loadings : array_like, float
+        Loadings matrix
+    
+    """
+    evals_tr = evals[0:neofs]
+    evecs_tr = evecs[:, 0:neofs]
+    loadings = evecs_tr * np.sqrt(evals_tr)
 
-def calc_pcs(z, evecs, npcs, mode='t'):
+    return loadings
+
+def calc_pcs(z, evecs, evals, npcs, mode='t'):
     """Calculate principal components time series coefficients
     
     Parameters
@@ -284,7 +310,7 @@ def calc_pcs(z, evecs, npcs, mode='t'):
     if mode == 't':
         # eigenvectors are already in time coefficients
         # evecs = [time, npcs]
-        pcs = evecs[:, 0:npcs]
+        pcs = loadings(evals, evecs, npcs)
     else:
         # [time, space]*[space, npcs] = [time, npcs]
         tmp = np.matmul(z, evecs[:, 0:npcs])
@@ -292,7 +318,7 @@ def calc_pcs(z, evecs, npcs, mode='t'):
     
     return pcs
 
-def calc_eofs(z, evecs, neofs, mode='t'):
+def calc_eofs(z, evecs, evals, neofs, mode='t'):
     """Calculate EOFs (spatial loadings) by projecting eigenvectors onto standardized data matrix
     
     Parameters
@@ -317,34 +343,12 @@ def calc_eofs(z, evecs, neofs, mode='t'):
         eof = tmp.T
     else:
         # eigenvectors are already in spatial mode
+        # scale them using loadings to get correct amplitude
         # evecs = [space, neofs]
-        eof = evecs[:,0:neofs]
+        tmp = loadings(evals, evecs, npcs)
+        eof = tmp.T
     
     return eof
-
-def loadings(evals, evecs, neofs):
-    """Calculate loadings matrix
-    
-    Parameters
-    ----------
-    evals : array_like, float
-        Vector of eignvalues
-    evecs : array_like, float
-        Matrix of eigenvectors
-    neofs : scalar, int
-        number of eofs to calculate loadings for
-             
-    Returns
-    -------
-    loadings : array_like, float
-        Loadings matrix
-    
-    """
-    evals_tr = evals[0:neofs]
-    evecs_tr = evecs[:, 0:neofs]
-    loadings = evecs_tr * np.sqrt(evals_tr)
-
-    return loadings
 
 
 def calc_eofs_svd(z, neofs):
