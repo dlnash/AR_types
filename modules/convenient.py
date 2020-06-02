@@ -5,22 +5,19 @@
 import numpy as np
 
 
+
 # VARIABLES (dicts)
 
-constants = {'earth_angular_velocity': 7.292e-5,
+constants = {'earth_angular_velocity': 7.2921e-5,
              'gravity': 9.80665,
             }
-
 
 units = {'ivt': 'kg m$^{-1}$ s$^{-1}$',
         }
 
-
-
 # FUNCTIONS
-
 def coriolis_parameter(latitude):   
-    
+    omega = constants['earth_angular_velocity']
     lats_rad = np.deg2rad(latitude)
     f = 2.0 * omega * np.sin(lats_rad)
     
