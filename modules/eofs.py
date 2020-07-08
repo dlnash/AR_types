@@ -345,7 +345,7 @@ def calc_eofs(z, evecs, evals, neofs, mode='t'):
         # eigenvectors are already in spatial mode
         # scale them using loadings to get correct amplitude
         # evecs = [space, neofs]
-        tmp = loadings(evals, evecs, npcs)
+        tmp = loadings(evals, evecs, neofs)
         eof = tmp.T
     
     return eof
