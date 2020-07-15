@@ -7,6 +7,8 @@ Collection of functions used to analyze time series (1-dimensional) data
 
 import os, sys
 import numpy as np
+import xarray as xr
+from scipy.stats import ttest_1samp, t
 
 
 # Define functions
@@ -74,6 +76,58 @@ def persistence(x):
     
     return event_id, nevents
 
+def ttest_1samp_lag(sample_obs, popmean):
+    '''Wrapped stats.ttest_1samp to iterate ttest over sample in xr.dataset form
+       The dataset should have coords ['time', 'lat', 'lon', 'lag']
+       This variation is used specifically to run ttest for multiple vars and multiple lags
+       
+    Parameters
+    ----------
+    sample_obs : xarray ds
+        grouped xarray ds object
+    popmean: array_like, zeros
+        array of repeating zeros that matches the dimensions of the sample_obs
+        
+    Returns
+    -------
+    tvalue : array_like, float
+        xarray ds object with same vars as sample_obs that has the tvalue for the one-sample t-test
+    pvalue : array_like, float
+        xarray ds object with same vars as sample_obs that has the pvalue for the one-sample t-test 
+    
+    Example
+    -------
+    Given:
+        sample_obs          = ds.groupby('time.season')
+    Returns:
+        tvalue   = ds_tvalue
+        pvalue   = ds_pvalue
+        
+    '''
+    return xr.apply_ufunc(ttest_1samp,
+                          sample_obs,
+                          input_core_dims=[['lag', 'time']],
+                          dask='allowed', output_core_dims=[['lag'], ['lag']],
+                          kwargs={'popmean': popmean, 'axis': -1, 'nan_policy': 'omit'})
+
+def independent_ttest(ds, group, alpha, df):
+    '''Calculate statistical significance using 1-sample t-test of ds with lag coord
+    and create mask of ds where values are considered significant'''
+    nlat = len(ds.lat)
+    nlon = len(ds.lon)
+    nlag = len(ds.lag)
+    # calculate t-statistic and p-value
+    tval, pval = ttest_1samp_lag(ds.groupby(group), popmean=np.zeros([nlat, nlon, nlag]))
+    # calculate the critical value
+    cv = t.ppf(1.0 - alpha, df)
+    print('Critical t-value: ', cv)
+    # interpret via critical value
+    # if abs(tvalue) >= cv, reject null hypothesis that the means are equal
+    maskt_idx = (abs(tval) >= cv)
+    # interpret via p-value
+    # if p < alpha, reject null hypothesis that the means are equal
+    maskp_idx = (pval < alpha)
+    return maskt_idx, maskp_idx
 
 
 #### CLEAN UP AND ADD DOC STRINGS ###
