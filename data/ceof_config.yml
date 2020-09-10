@@ -1,0 +1,193 @@
+# Filename:    ceof_config.yml
+# Author:      Deanna Nash, dlnash@ucsb.edu
+# Description: Configuration arguments for using different cEOFs.
+
+---
+test1: 
+    domain:
+    - extratropics
+    - extratropics
+    - extratropics
+    - tropics
+    - tropics
+    - tropics
+    fnameID: HUV250QUV850
+    latlon:
+    - 0
+    - 120
+    - -15
+    - 65
+    levs:
+    - 250.0
+    - 850.0
+    name: test1
+    pathvar: huvq
+    varlev:
+    - 250.0
+    - 250.0
+    - 250.0
+    - 850.0
+    - 850.0
+    - 850.0
+    varlist:
+    - H
+    - U
+    - V
+    - QV
+    - U
+    - V
+    
+test2:
+    domain:
+    - extratropics
+    - extratropics
+    - extratropics
+    - tropics
+    - tropics
+    - tropics
+    fnameID: HUV500QUV500
+    latlon:
+    - 0
+    - 120
+    - -15
+    - 65
+    levs:
+    - 500.0
+    name: test2
+    pathvar: huvq
+    varlev:
+    - 500.0
+    - 500.0
+    - 500.0
+    - 500.0
+    - 500.0
+    - 500.0
+    varlist:
+    - H
+    - U
+    - V
+    - QV
+    - U
+    - V
+    
+test3:
+    domain:
+    - extratropics
+    - extratropics
+    - extratropics
+    - tropics
+    - tropics
+    - tropics
+    fnameID: HUV500HUV500
+    latlon:
+    - 0
+    - 120
+    - -15
+    - 65
+    levs:
+    - 500.0
+    name: test3
+    pathvar: huvq
+    varlev:
+    - 500.0
+    - 500.0
+    - 500.0
+    - 500.0
+    - 500.0
+    - 500.0
+    varlist:
+    - H
+    - U
+    - V
+    - H
+    - U
+    - V
+    
+test4:
+    domain:
+    - fulldomain
+    - fulldomain
+    - fulldomain
+    fnameID: HUV500
+    latlon:
+    - 0
+    - 120
+    - 0
+    - 50
+    levs:
+    - 500.0
+    name: test4
+    pathvar: huvq
+    varlev:
+    - 500.0
+    - 500.0
+    - 500.0
+    varlist:
+    - H
+    - U
+    - V
+    
+test5:
+    domain:
+    - fulldomain
+    - fulldomain
+    fnameID: IVT
+    latlon:
+    - 0
+    - 120
+    - 0
+    - 50
+    levs: []
+    name: test5
+    pathvar: ivt
+    varlev: []
+    varlist:
+    - ivte
+    - ivtn
+
+test6:
+    domain:
+    - fulldomain
+    - fulldomain
+    - fulldomain
+    - fulldomain
+    fnameID: HUV500Q850
+    latlon:
+    - 0
+    - 120
+    - 0
+    - 50
+    levs:
+    - 500.0
+    - 850.0
+    name: test6
+    pathvar: huvq
+    varlev:
+    - 500.0
+    - 500.0
+    - 500.0
+    - 850.0
+    varlist:
+    - H
+    - U
+    - V
+    - QV
+  
+eof_domain:
+    extratropics:
+    - 0.0
+    - 120.0
+    - 25.0
+    - 65.0
+    fulldomain:
+    - 0.0
+    - 120.0
+    - 0.0
+    - 50.0
+    tropics:
+    - 0.0
+    - 120.0
+    - -15.0
+    - 25.0
+
+...

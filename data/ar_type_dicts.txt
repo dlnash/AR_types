@@ -1,0 +1,180 @@
+to convert to yaml 
+print(yaml.dump(ivt_non_anom))
+
+# 1) Upper level plots
+upper_non_anom = {'name': 'huv250',
+                  'anom': 'nanom',
+                  'fname': 'ERA5/huvq/daily/out.era5_hma_05dg_daily_huvq_*.nc',
+                  'bnds': [30., 120., 0., 65.],
+                  'lev': 250.,
+                  'cflevs': "np.arange(40,131,10)",
+                  'cmap': 'BuPu',
+                  'clevs': "np.arange(840,1280,12)",
+                  'quiver_scale': 10,
+                  'quiver_key': 25,
+                  'quiver_key_lbl': r'25 m s$^{-1}$',
+                  'cb_label': 'wind speed (kt)',
+                  'fig_name_prefix': 'ar_types_upper_'}
+
+upper_anom = {'name': 'huv250',
+              'anom': 'anom',
+              'fname': 'ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc',
+              'bnds': [30., 120., 0., 65.],
+              'lev': 250.,
+              'cflevs': 'np.arange(0,43,6)',
+              'cmap': 'BuPu',
+              'clevs': 'np.arange(-10,11,2)',
+              'quiver_scale': 2,
+              'quiver_key': 10,
+              'quiver_key_lbl': r'10 m s$^{-1}$',
+              'cb_label': 'wind speed (kt)',
+              'fig_name_prefix': 'anom_ar_types_upper_'}
+
+# 2) Precip Plots
+precip_non_anom = {'name': 'prec',
+                   'anom': 'nanom',
+                   'fname': 'ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc',
+                   'bnds': [40., 120., 10., 50.],
+                   'cflevs': 'np.arange(2,22,2)',
+                   'cmap': 'cmo.rain',
+                   'clevs': None,
+                   'quiver_scale': None,
+                   'quiver_key': None,
+                   'quiver_key_lbl': None,
+                   'cb_label': 'mm day$^{-1}$',
+                   'fig_name_prefix': 'ar_types_prec_'}
+
+precip_anom = {'name': 'prec',
+               'anom': 'anom',
+               'fname': 'ERA5/prec/anomalies/daily_filtered_anomalies_*.nc',
+               'bnds': [40., 120., 10., 50.],
+               'cflevs': 'np.arange(-6,22,2)',
+               'cmap': 'cmocean.tools.crop(cmo.balance, vmin=-6., vmax=22., pivot=0., N=None, dmax=None)',
+               'clevs': None,
+               'quiver_scale': None,
+               'quiver_key': None,
+               'quiver_key_lbl': None,
+               'cb_label': 'mm day-1',
+               'fig_name_prefix': 'anom_ar_types_prec_'}
+
+# 3) IVT plots
+ivt_non_anom = {'name': 'ivt',
+                'anom': 'nanom',
+                'fname': 'ERA5/ivt/daily/out.era5*.nc',
+                'bnds': [30., 120., 0., 50.],
+                'cflevs': 'np.arange(100,601,50)',
+                'cmap': 'cmo.deep',
+                'clevs': None,
+                'quiver_scale': 50,
+                'quiver_key': 250,
+                'quiver_key_lbl': r'250 kg m$^{-1}$ s$^{-1}$',
+                'cb_label': 'kg m$^{-1}$ s$^{-1}$',
+                'fig_name_prefix': 'ar_types_ivt_'}
+
+ivt_anom = {'name': 'ivt',
+            'anom': 'anom',
+            'fname': 'ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc',
+            'bnds': [30., 120., 0., 50.],
+            'cflevs': 'np.arange(10,180,10)',
+            'cmap': 'cmo.deep',
+            'clevs': None,
+            'quiver_scale': 10,
+            'quiver_key': 25,
+            'quiver_key_lbl': r'25 kg m$^{-1}$ s$^{-1}$',
+            'cb_label': 'kg m$^{-1}$ s$^{-1}$',
+            'fig_name_prefix': 'anom_ar_types_ivt_'}
+
+## Possible choices for cEOF k-means - a) DJF b) MAM c) DJF-MAM
+djf_dict = {'start_date': '1979-12-01',
+             'end_date': '2018-02-28',
+             'mon_s': 12,
+             'mon_e': 2,
+             'ys': 1979,
+             'ye': 2018,
+             'day_s': '01',
+             'day_e': '28',
+             'ssn': 'djf'}
+
+# Option 2 - MAM only
+mam_dict = {'start_date': '1979-03-01',
+             'end_date': '2018-5-31',
+             'mon_s': 3,
+             'mon_e': 5,
+             'ys': 1979,
+             'ye': 2018,
+             'day_s': '01',
+             'day_e': '31',
+             'ssn': 'mam'}
+
+# Option 3 - DJF and MAM combined
+djfmam_dict = {'start_date': '1979-03-01',
+               'end_date': '2018-5-31',
+               'mon_s': 12,
+               'mon_e': 5,
+               'ys': 1979,
+               'ye': 2018,
+               'day_s': '01',
+               'day_e': '31',
+               'ssn': 'djfmam'}
+
+test1 = {'name':     'test1',
+         'fnameID':  'HUV250QUV850',
+         'latlon':   [0, 120, -15, 65],
+         'levs':     [250., 850.],
+         'pathvar':   'huvq',
+         'domain':    ['extratropics', 'extratropics', 'extratropics', 'tropics', 'tropics', 'tropics'],
+         'varlist':   ['H', 'U', 'V', 'QV', 'U', 'V'],
+         'varlev':    [250., 250., 250., 850., 850., 850.]}
+
+test2 = {'name':     'test2',
+         'fnameID':  'HUV500QUV500',
+         'latlon':   [0, 120, -15, 65],
+         'levs':     [500.],
+         'pathvar':   'huvq',
+         'domain':    ['extratropics', 'extratropics', 'extratropics', 'tropics', 'tropics', 'tropics'],
+         'varlist':   ['H', 'U', 'V', 'QV', 'U', 'V'],
+         'varlev':    [500., 500., 500., 500., 500., 500.]}
+
+test3 = {'name':     'test3',
+         'fnameID':  'HUV500HUV500',
+         'latlon':   [0, 120, -15, 65],
+         'levs':     [500.],
+         'pathvar':   'huvq',
+         'domain':    ['extratropics', 'extratropics', 'extratropics', 'tropics', 'tropics', 'tropics'],
+         'varlist':   ['H', 'U', 'V', 'H', 'U', 'V'],
+         'varlev':    [500., 500., 500., 500., 500., 500.]}
+
+test4 = {'name':     'test4',
+         'fnameID':  'HUV500',
+         'latlon':   [0, 120, 0, 50],
+         'levs':     [500.],
+         'pathvar':   'huvq',
+         'domain':    ['fulldomain', 'fulldomain', 'fulldomain'],
+         'varlist':   ['H', 'U', 'V',],
+         'varlev':    [500., 500., 500.]}
+
+test5 = {'name':     'test5',
+         'fnameID':  'IVT',
+         'latlon':   [0, 120, 0, 50],
+         'levs':     [],
+         'pathvar':   'ivt',
+         'domain':    ['fulldomain', 'fulldomain'],
+         'varlist':   ['ivte', 'ivtn'],
+         'varlev':    []}
+
+test6 = {'name':     'test6',
+         'fnameID':  'HUV500Q850',
+         'latlon':   [0, 120, 0, 50],
+         'levs':     [500., 850.],
+         'pathvar':   'huvq',
+         'domain':    ['fulldomain', 'fulldomain', 'fulldomain', 'fulldomain'],
+         'varlist':   ['H', 'U', 'V', 'QV'],
+         'varlev':    [500., 500., 500., 850.]}
+
+
+eof_domain = {'extratropics': [0., 120., 25., 65.],
+              'tropics': [0., 120., -15., 25.],
+              'fulldomain': [0., 120., 0., 50.]}
+
+
+config_dict = [test1, test2, test3, test4, test5, test6]

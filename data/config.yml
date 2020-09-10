@@ -1,122 +1,179 @@
 # Filename:    config.yml
 # Author:      Deanna Nash, dlnash@ucsb.edu
-# Description: Configuration arguments for using different variables, seasons, cEOFs, etc.
+# Description: Configuration arguments for using different variables, seasons, etc.
 
 ---
 # Upper Level Plot Configuration
 upper_non_anom:
-    name: huv250
     anom: nanom
+    bnds:
+    - 30.0
+    - 120.0
+    - 0.0
+    - 65.0
+    cb_label: wind speed (kt)
+    cflevs:
+    - 40
+    - 131
+    - 10
+    clevs:
+    - 840
+    - 1280
+    - 12
+    cmap: BuPu
+    fig_name_prefix: ar_types_upper_
     fname: ERA5/huvq/daily/out.era5_hma_05dg_daily_huvq_*.nc
-    bnds: [30., 120., 0., 65.] # [west, east, south, north]
-    lev: 250.
-    cflevs: np.arange(40,131,10)
-    cmap': BuPu
-    clevs': np.arange(840,1280,12),
-    quiver_scale: 10
+    lev: 250.0
+    name: huv250
     quiver_key: 25
-    quiver_key_lbl: "25 m s$^{-1}$"
-    cb_label: "wind speed (kt)"
-    fig_name_prefix: "ar_types_upper_"
+    quiver_key_lbl: 25 m s$^{-1}$
+    quiver_scale: 10
 
 upper_anom:
-    name: 'huv250'
-    anom: 'anom'
-              'fname': 'ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc',
-              'bnds': [30., 120., 0., 65.],
-              'lev': 250.,
-              'cflevs': np.arange(0,43,6),
-              'cmap': 'BuPu',
-              'clevs': np.arange(-10,11,2),
-              'quiver_scale': 2,
-              'quiver_key': 10,
-              'quiver_key_lbl': r'10 m s$^{-1}$',
-              'cb_label': 'wind speed (kt)',
-              'fig_name_prefix': 'anom_ar_types_upper_'}
+    anom: anom
+    bnds:
+    - 30.0
+    - 120.0
+    - 0.0
+    - 65.0
+    cb_label: wind speed (kt)
+    cflevs:
+    - 0
+    - 43
+    - 6
+    clevs:
+    - -10
+    - 11
+    - 2
+    cmap: BuPu
+    fig_name_prefix: anom_ar_types_upper_
+    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
+    lev: 250.0
+    name: huv250
+    quiver_key: 10
+    quiver_key_lbl: 10 m s$^{-1}$
+    quiver_scale: 2
 
 # 2) Precip Plots
-precip_non_anom = {'name': 'prec',
-                   'anom': 'nanom',
-                   'fname': 'ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc',
-                   'bnds': [40., 120., 10., 50.],
-                   'cflevs': np.arange(2,22,2),
-                   'cmap': cmo.rain,
-                   'clevs': None,
-                   'quiver_scale': None,
-                   'quiver_key': None,
-                   'quiver_key_lbl': None,
-                   'cb_label': 'mm day-1',
-                   'fig_name_prefix': 'ar_types_prec_'}
+precip_non_anom:
+    anom: nanom
+    bnds:
+    - 40.0
+    - 120.0
+    - 10.0
+    - 50.0
+    cb_label: mm day$^{-1}$
+    cflevs:
+    - 2
+    - 22
+    - 2
+    clevs: null
+    cmap: cmo.rain
+    fig_name_prefix: ar_types_prec_
+    fname: ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc
+    name: prec
+    quiver_key: null
+    quiver_key_lbl: null
+    quiver_scale: null
 
-precip_anom = {'name': 'prec',
-               'anom': 'anom',
-               'fname': 'ERA5/prec/anomalies/daily_filtered_anomalies_*.nc',
-               'bnds': [40., 120., 10., 50.],
-               'cflevs': np.arange(-6,22,2),
-               'cmap': cmocean.tools.crop(cmo.balance, vmin=-6., vmax=22., pivot=0., N=None, dmax=None),
-               'clevs': None,
-               'quiver_scale': None,
-               'quiver_key': None,
-               'quiver_key_lbl': None,
-               'cb_label': 'mm day-1',
-               'fig_name_prefix': 'anom_ar_types_prec_'}
+precip_anom:
+    anom: anom
+    bnds:
+    - 40.0
+    - 120.0
+    - 10.0
+    - 50.0
+    cb_label: mm day-1
+    cflevs:
+    - -6
+    - 22
+    - 2
+    clevs: null
+    cmap: cmo.balance
+    fig_name_prefix: anom_ar_types_prec_
+    fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
+    name: prec
+    quiver_key: null
+    quiver_key_lbl: null
+    quiver_scale: null
 
 # 3) IVT plots
-ivt_non_anom = {'name': 'ivt',
-                'anom': 'nanom',
-                'fname': 'ERA5/ivt/daily/out.era5*.nc',
-                'bnds': [30., 120., 0., 50.],
-                'cflevs': np.arange(100,601,50),
-                'cmap': cmo.deep,
-                'clevs': None,
-                'quiver_scale': 50,
-                'quiver_key': 250,
-                'quiver_key_lbl': r'250 kg m$^{-1}$ s$^{-1}$',
-                'cb_label': 'kg m$^{-1}$ s$^{-1}$',
-                'fig_name_prefix': 'ar_types_ivt_'}
+ivt_non_anom:
+    anom: nanom
+    bnds:
+    - 45.0
+    - 120.0
+    - 15.0
+    - 50.0
+    cb_label: kg m$^{-1}$ s$^{-1}$
+    cflevs:
+    - 100
+    - 401
+    - 25
+    clevs: null
+    cmap: cmo.deep
+    fig_name_prefix: ar_types_ivt_
+    fname: ERA5/ivt/daily/out.era5*.nc
+    name: ivt
+    quiver_key: 250
+    quiver_key_lbl: 250 kg m$^{-1}$ s$^{-1}$
+    quiver_scale: 50
 
-ivt_anom = {'name': 'ivt',
-            'anom': 'anom',
-            'fname': 'ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc',
-            'bnds': [30., 120., 0., 50.],
-            'cflevs': np.arange(10,180,10),
-            'cmap': cmo.deep,
-            'clevs': None,
-            'quiver_scale': 10,
-            'quiver_key': 25,
-            'quiver_key_lbl': r'25 kg m$^{-1}$ s$^{-1}$',
-            'cb_label': 'kg m$^{-1}$ s$^{-1}$',
-            'fig_name_prefix': 'anom_ar_types_ivt_'}
+ivt_anom:
+    anom: anom
+    bnds:
+    - 30.0
+    - 120.0
+    - 0.0
+    - 50.0
+    cb_label: kg m$^{-1}$ s$^{-1}$
+    cflevs:
+    - 10
+    - 180
+    - 10
+    clevs: null
+    cmap: cmo.deep
+    fig_name_prefix: anom_ar_types_ivt_
+    fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
+    name: ivt
+    quiver_key: 25
+    quiver_key_lbl: 25 kg m$^{-1}$ s$^{-1}$
+    quiver_scale: 10
 
 ## Possible choices for cEOF k-means - a) DJF b) MAM c) DJF-MAM
-djf_dict = {'start_date': '1979-12-01',
-             'end_date': '2018-02-28',
-             'mon_s': 12,
-             'mon_e': 2,
-             'ys': 1979,
-             'ye': 2018,
-             'day_s': '01',
-             'day_e': '28',
-             'ssn': 'djf'}
+djf:
+    day_e: '28'
+    day_s: '01'
+    end_date: '2018-02-28'
+    mon_e: 2
+    mon_s: 12
+    ssn: djf
+    start_date: '1979-12-01'
+    ye: 2018
+    ys: 1979
 
 # Option 2 - MAM only
-mam_dict = {'start_date': '1979-03-01',
-             'end_date': '2018-5-31',
-             'mon_s': 3,
-             'mon_e': 5,
-             'ys': 1979,
-             'ye': 2018,
-             'day_s': '01',
-             'day_e': '31',
-             'ssn': 'mam'}
+mam:
+    day_e: '31'
+    day_s: '01'
+    end_date: 2018-5-31
+    mon_e: 5
+    mon_s: 3
+    ssn: mam
+    start_date: '1979-03-01'
+    ye: 2018
+    ys: 1979
 
 # Option 3 - DJF and MAM combined
-djfmam_dict = {'start_date': '1979-03-01',
-               'end_date': '2018-5-31',
-               'mon_s': 12,
-               'mon_e': 5,
-               'ys': 1979,
-               'ye': 2018,
-               'day_s': '01',
-               'day_e': '31',
-               'ssn': 'djfmam'}
+djfmam:
+    day_e: '31'
+    day_s: '01'
+    end_date: 2018-5-31
+    mon_e: 5
+    mon_s: 12
+    ssn: djfmam
+    start_date: '1979-03-01'
+    ye: 2018
+    ys: 1979
+    
+...
