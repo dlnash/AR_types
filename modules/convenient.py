@@ -5,7 +5,6 @@
 import numpy as np
 
 
-
 # VARIABLES (dicts)
 
 constants = {'earth_angular_velocity': 7.2921e-5,

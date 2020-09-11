@@ -53,6 +53,31 @@ upper_anom:
     quiver_key: 10
     quiver_key_lbl: 10 m s$^{-1}$
     quiver_scale: 2
+    
+upper_diff:
+    anom: non_anom
+    bnds:
+    - 30.0
+    - 120.0
+    - 0.0
+    - 65.0
+    cb_label: wind speed (kt)
+    cflevs:
+    - 0
+    - 36
+    - 5
+    clevs:
+    - -10
+    - 11
+    - 2
+    cmap: BuPu
+    fig_name_prefix: non_anom_upper_diff_
+    fname: ERA5/huvq/daily/out.era5_hma_05dg_daily_huvq_*.nc
+    lev: 250.0
+    name: huv250
+    quiver_key: 10
+    quiver_key_lbl: 10 m s$^{-1}$
+    quiver_scale: 2
 
 # 2) Precip Plots
 precip_non_anom:
@@ -96,6 +121,27 @@ precip_anom:
     quiver_key: null
     quiver_key_lbl: null
     quiver_scale: null
+    
+precip_diff:
+    anom: nanom
+    bnds:
+    - 40.0
+    - 120.0
+    - 10.0
+    - 50.0
+    cb_label: mm day-1
+    cflevs:
+    - 0
+    - 10
+    - 1
+    clevs: null
+    cmap: cmo.rain
+    fig_name_prefix: non_anom_prec_diff_
+    fname: ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc
+    name: prec
+    quiver_key: null
+    quiver_key_lbl: null
+    quiver_scale: null
 
 # 3) IVT plots
 ivt_non_anom:
@@ -135,6 +181,27 @@ ivt_anom:
     cmap: cmo.deep
     fig_name_prefix: anom_ar_types_ivt_
     fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
+    name: ivt
+    quiver_key: 25
+    quiver_key_lbl: 25 kg m$^{-1}$ s$^{-1}$
+    quiver_scale: 10
+    
+ivt_diff:
+    anom: anom
+    bnds:
+    - 30.0
+    - 120.0
+    - 0.0
+    - 50.0
+    cb_label: kg m$^{-1}$ s$^{-1}$
+    cflevs:
+    - 10
+    - 180
+    - 10
+    clevs: null
+    cmap: cmo.deep
+    fig_name_prefix: non_anom_ivt_diff_
+    fname: ERA5/ivt/daily/out.era5*.nc
     name: ivt
     quiver_key: 25
     quiver_key_lbl: 25 kg m$^{-1}$ s$^{-1}$
