@@ -151,3 +151,45 @@ def transition_matrix(x, states):
     probs = transc / margin[:,np.newaxis]
     
     return transc, probs
+
+
+def calc_seasonal_contribution(ds_list, df, prec_var, mon_s, mon_e):
+    '''
+    For a list of ds, calculate the average total seasonal contribution of ARs for the given prec_vars
+    
+    '''
+    ds_clim_lst = []
+    ds_frac_lst = []
+    ds_std_lst = []
+
+    for k, ds in enumerate(ds_list):
+        # Add AR time series to ds; set as coordinate variables
+        ds = add_ar_time_series(ds, df)
+
+        # Select months
+        if mon_s > mon_e:
+            idx = (df.index.month >= mon_s) | (df.index.month <= mon_e)
+        else:
+            idx = (df.index.month >= mon_s) & (df.index.month <= mon_e)
+        ds = ds.sel(time=idx)
+        
+        # Select AR days
+        idx = (ds.ar >= 1)
+        ds_ar = ds.sel(time=idx)
+
+        # calculate seasonal totals
+        ds_ssn_sum = ds.resample(time='QS-DEC').sum()
+        ds_ar_ssn_sum = ds_ar.resample(time='QS-DEC').sum()                                 
+
+        # calculate average of seasonal totals
+        ds_clim = ds_ssn_sum.mean(dim='time')
+        ds_ar_clim = ds_ar_ssn_sum.mean(dim='time') 
+
+        # things to output/append to final lists
+        ds_frac_lst.append((ds_ar_clim[prec_var[k]].values/ds_clim[prec_var[k]].values)*100.)
+        ds_std_lst.append(ds_ar_ssn_sum[prec_var[k]].std(dim='time').values)
+        ds_clim_lst.append(ds_clim[prec_var[k]].values)
+    
+    return ds_clim_lst, ds_frac_lst, ds_std_lst
+
+

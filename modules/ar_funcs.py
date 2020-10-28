@@ -88,3 +88,12 @@ def ar_climatology(dataarray, threshold):
     day_list = mask.dropna(dim='time').time
                            
     return day_list
+
+def add_ar_time_series(ds, df):
+    '''Add AR time series to ds; set as coordinate variables'''
+    ds['ar'] = ('time', df.ar)
+    ds = ds.set_coords('ar')
+    ds['location'] = ('time', df.location)
+    ds = ds.set_coords('location')
+    
+    return ds

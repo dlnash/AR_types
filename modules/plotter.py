@@ -15,9 +15,9 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.ticker as mticker
 import colorsys
 from matplotlib.colors import LinearSegmentedColormap # Linear interpolation for color maps
+import matplotlib.patches as mpatches
 
-
-def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, yticks=None, grid=False):
+def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, yticks=None, grid=False, left_lats=True, right_lats=False):
     """
     Creates and returns a background map on which to plot data. 
     
@@ -44,6 +44,12 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
     
     yticks : float
         array of ytick locations (latitude tick marks)
+        
+    left_lats : bool
+        Whether to add latitude labels on the left side. Default: True
+        
+    right_lats : bool
+        Whether to add latitude labels on the right side. Default: False
         
     Returns
     -------
@@ -87,13 +93,14 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
         gl = ax.gridlines(crs=mapcrs, draw_labels=True,
                       linewidth=.5, color='black', alpha=0.5, linestyle='--')
         gl.xlabels_top = False
-        gl.ylabels_right = False
+        gl.ylabels_left = left_lats
+        gl.ylabels_right = right_lats
         gl.xlocator = mticker.FixedLocator(xticks)
         gl.ylocator = mticker.FixedLocator(yticks)
         gl.xformatter = LONGITUDE_FORMATTER
         gl.yformatter = LATITUDE_FORMATTER
-        gl.xlabel_style = {'size': 7, 'color': 'gray'}
-        gl.ylabel_style = {'size': 7, 'color': 'gray'}
+        gl.xlabel_style = {'size': 10, 'color': 'gray'}
+        gl.ylabel_style = {'size': 10, 'color': 'gray'}
     
     ## Gridlines
     # Draw gridlines if requested
@@ -107,7 +114,7 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
 
     # apply tick parameters    
     ax.tick_params(direction='out', 
-                   labelsize=8.5, 
+                   labelsize=10, 
                    length=4, 
                    pad=2, 
                    color='black')
