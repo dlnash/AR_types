@@ -8,7 +8,8 @@ Collection of functions used to analyze time series (1-dimensional) data
 import os, sys
 import numpy as np
 import xarray as xr
-from scipy.stats import ttest_1samp, t
+import pandas as pd
+from scipy.stats import ttest_1samp, t, pearsonr
 
 
 # Define functions
@@ -193,3 +194,110 @@ def calc_seasonal_contribution(ds_list, df, prec_var, mon_s, mon_e):
     return ds_clim_lst, ds_frac_lst, ds_std_lst
 
 
+def select_months(df, mon_s, mon_e):
+    # Select months
+    if mon_s > mon_e:
+        idx = (df.index.month >= mon_s) | (df.index.month <= mon_e)
+    else:
+        idx = (df.index.month >= mon_s) & (df.index.month <= mon_e)
+
+    df = df.loc[idx]
+    
+    return df 
+
+def autocorr_diff(ts1, ts2):
+    '''Calculate autocorrelation of the difference between two paired samples'''
+    # put into pandas df
+    data = {'ts1':   ts1,
+            'ts2':   ts2,
+            'diff_ts':   ts1-ts2}
+
+    df = pd.DataFrame(data)
+    rho1 = df.diff_ts.autocorr(lag=1)
+    
+    return rho1
+    
+def n_prime(ts1, ts2):
+    '''
+    calculate the effective sample size/equivalent number of independent samples 
+    from two paired samples of time series data that have high autocorrelation
+    
+    $n'  \approx n \frac{1-\rho_1}{1+\rho_1} $
+    '''
+    n = len(ts1)
+    rho1 = autocorr_diff(ts1, ts2)
+    nprime = n * ((1-rho1)/(1+rho1))
+    
+    return rho1, nprime
+
+def ttest_autocorrelation(ts1, ts2, alpha):
+    '''find pvalue and tvalue based on more stringent nprime (lag1 autocorrelation of 2 time series)
+       for 2 sample 2-sided t-test
+    '''
+    # get degrees of freedom
+    if autocorr == True:
+        # calculate lag-1 autocorrelation difference
+        rho1, n = n_prime(ts1, ts2)
+    if autocorr == False:
+        n = len(ts1)
+    df = n-2
+    
+    # calculate t-statistic and p-value
+    tval, pval = ttest_ind(ts1, ts2)
+    # calculate the critical value
+    cv = t.ppf(1.0 - alpha, df)
+#     print('Critical t-value: ', cv)
+    
+    # find p-value based on tval and nprime (rather than n)
+    pval = t.sf(np.abs(tval), df)*2  # two-sided pvalue = Prob(abs(t)>tt)
+    # interpret via critical value
+    # if abs(tvalue) >= cv, reject null hypothesis that the means are equal
+#     if abs(tval) >= cv:
+#         print('t-value is greater than critical value, we reject the null hypothesis that the means are equal')
+#     elif abs(tval) <= cv:
+#         print('t-value is less than critical value, we accept the null hypothesis that the means are equal')
+#     # interpret via p-value
+#     # if p < alpha, reject null hypothesis that the means are equal
+#     if pval < alpha:
+#         print('p-value is less than alpha, we reject the null hypothesis that the means are equal')
+#     elif pval > alpha:
+#         print('p-value is greater than alpha, we accept the null hypothesis that the means are equal')
+    
+    return tval, pval
+
+def pearsonr_autocorrelation(ts1, ts2, alpha, autocorr=True):
+    '''find pvalue and tvalue based on more stringent nprime (lag1 autocorrelation of 2 time series)
+       for pearson-r correlation
+    '''
+    # correlation between time series
+    r, p = pearsonr(ts1, ts2)
+#     print('Original pearson r results: ', r, p)
+    # get degrees of freedom
+    if autocorr == True:
+        # calculate lag-1 autocorrelation difference
+        rho1, n = n_prime(ts1, ts2)
+    if autocorr == False:
+        n = len(ts1)
+    df = n-2
+    # calculate significance of correlation coefficient
+    s_T = np.sqrt((1-r**2)/df)
+    # get t-value
+    tval = (r-0)/s_T
+    # get p-value
+    pval = t.sf(np.abs(tval), df)*2  # two-sided pvalue = Prob(abs(t)>tt)
+    # calculate the critical value
+    cv = t.ppf(1.0 - alpha, df)
+#     # interpret via critical value
+#     # if abs(tvalue) >= cv, reject null hypothesis that the means are equal
+#     if abs(tval) >= cv:
+#         print('t-value is greater than critical value, considered statistically significant')
+#     elif abs(tval) <= cv:
+#         print('t-value is less than critical value, NOT considered statistically significant')
+#     # interpret via p-value
+#     # if p < alpha, reject null hypothesis that the means are equal
+#     if pval < alpha:
+#         print('p-value is less than alpha, considered statistically significant')
+#     elif pval > alpha:
+#         print('p-value is greater than alpha, NOT considered statistically significant')
+        
+    return tval, pval
