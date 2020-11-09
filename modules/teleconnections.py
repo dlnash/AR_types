@@ -34,10 +34,10 @@ def build_teleconnection_df(ref, col, start_date, end_date):
 
     # create single df
     data = {'date':  dfs[0].index,
-            'ao':    dfs[0].values,
-            'pdo':   dfs[1].values,
-            'enso':  dfs[2].values,
-            'sh':    dfs[3].values}
+            'AO':    dfs[0].values,
+            'PDO':   dfs[1].values,
+            'ENSO':  dfs[2].values,
+            'SH':    dfs[3].values}
 
     df_index = pd.DataFrame(data)
     df_index = df_index.set_index('date')
