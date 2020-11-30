@@ -10,7 +10,7 @@ import os, sys
 import numpy as np
 import xarray as xr
 import pandas as pd
-from scipy.stats import ttest_1samp, t, pearsonr, norm
+from scipy.stats import ttest_1samp, t, pearsonr, norm, linregress
 import scipy.stats.distributions as dist
 
 def ttest_1samp_lag(sample_obs, popmean):
@@ -47,7 +47,7 @@ def ttest_1samp_lag(sample_obs, popmean):
                           dask='allowed', output_core_dims=[['lag'], ['lag']],
                           kwargs={'popmean': popmean, 'axis': -1, 'nan_policy': 'omit'})
 
-def independent_ttest(ds, group, alpha, df):
+def independent_ttest(ds, group, alpha, n):
     '''Calculate statistical significance using 1-sample t-test of ds with lag coord
     and create mask of ds where values are considered significant'''
     nlat = len(ds.lat)
@@ -56,11 +56,15 @@ def independent_ttest(ds, group, alpha, df):
     # calculate t-statistic and p-value
     tval, pval = ttest_1samp_lag(ds.groupby(group), popmean=np.zeros([nlat, nlon, nlag]))
     # calculate the critical value
+    df = n-2
     cv = t.ppf(1.0 - alpha, df)
     print('Critical t-value: ', cv)
     # interpret via critical value
     # if abs(tvalue) >= cv, reject null hypothesis that the means are equal
     maskt_idx = (abs(tval) >= cv)
+    
+    # find p-value based on tval and nprime (rather than n)
+    pval = t.sf(np.abs(tval), df)*2  # two-sided pvalue = Prob(abs(t)>tt)
     # interpret via p-value
     # if p < alpha, reject null hypothesis that the means are equal
     maskp_idx = (pval < alpha)
@@ -322,3 +326,19 @@ def build_zscore_df(df):
                        index=index)
     
     return df_z
+
+def new_linregress(x, y):
+    # Wrapper around scipy linregress to use in apply_ufunc
+    slope, intercept, r_value, p_value, std_err = linregress(x, y)
+    return np.array([slope, intercept, r_value, p_value, std_err])
+
+def lin_regress(ds, x, y):
+    '''Wrapped scipy.stats.linregress to calculate slope, y-int, r-value, p-value, and standard error in xr.dataset form'''
+    return xr.apply_ufunc(new_linregress, ds[x], ds[y],
+                           input_core_dims=[['time'], ['time']],
+                           output_core_dims=[["parameter"]],
+                           vectorize=True,
+                           dask="parallelized",
+                           output_dtypes=['float64'],
+                           output_sizes={"parameter": 5},
+                      )

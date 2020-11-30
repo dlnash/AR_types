@@ -13,7 +13,7 @@ import seaborn as sns
 
 # FUNCTIONS
 
-def plot_optimal_k(data, kmax, filename=None):
+def plot_optimal_k(data, kmax, create_plot=False, filename=None):
     """ Elbow plot to determine optimal number of clusters (k) 
     
     Parameters
@@ -35,17 +35,19 @@ def plot_optimal_k(data, kmax, filename=None):
         km = KMeans(n_clusters=kclusters[i])
         km = km.fit(data)
         cohesion[i] = (km.inertia_)
+    if create_plot == True:
+        # Elbow plot
+        fig, ax = plt.subplots()
+        sns.set_style("whitegrid")
+        ax.plot(kclusters, cohesion, marker='o', linewidth=2.0, markersize=7.0)
+        ax.set_title('Elbow Plot for Optimal K')
+        ax.set_ylabel('Sum of Sq Dist (cohesion)')
+        ax.set_xlabel('k (# of clusters)')
+        ax.set_xticks(kclusters)
 
-    # Elbow plot
-    fig, ax = plt.subplots()
-    sns.set_style("whitegrid")
-    ax.plot(kclusters, cohesion, marker='o', linewidth=2.0, markersize=7.0)
-    ax.set_title('Elbow Plot for Optimal K')
-    ax.set_ylabel('Sum of Sq Dist (cohesion)')
-    ax.set_xlabel('k (# of clusters)')
-    ax.set_xticks(kclusters)
-
-    if filename:
-        plt.savefig(filename)
+        if filename:
+            plt.savefig(filename)
+    else:
+        return kclusters, cohesion
 
     plt.show()

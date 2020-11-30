@@ -11,25 +11,22 @@ dependencies:
   - scikit-learn
   - pandas
   - netcdf4
-  - xarray
+  - xarray=0.16.1
   - dask
   - bottleneck
-  - metpy
+  - metpy=0.12
  # Plotting
   - matplotlib
   - cartopy
-  - seaborn
+  - seaborn=0.11.0
   - cmocean
  # Jupyter
   - jupyter
   - ipykernel
-  - jupyter_contrib_nbextensions
   - jupyter-server-proxy
-  - ipywidgets
  # pip packages
   - pip:
     - jupyterthemes
-    - matplotlib-venn
 
 
       

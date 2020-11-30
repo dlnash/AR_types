@@ -87,7 +87,7 @@ precip_non_anom:
     - 120.0
     - 10.0
     - 50.0
-    cb_label: mm day$^{-1}$
+    cb_label: Precipitation (mm day$^{-1}$)
     cflevs:
     - 2
     - 22
@@ -108,7 +108,7 @@ precip_anom:
     - 120.0
     - 10.0
     - 50.0
-    cb_label: mm day-1
+    cb_label: Precipitation (mm day$^{-1}$)
     cflevs:
     - -6
     - 22
@@ -129,7 +129,7 @@ precip_diff:
     - 120.0
     - 10.0
     - 50.0
-    cb_label: mm day-1
+    cb_label: Precipitation (mm day$^{-1}$)
     cflevs:
     - 0
     - 10
@@ -151,11 +151,11 @@ ivt_non_anom:
     - 120.0
     - 15.0
     - 50.0
-    cb_label: kg m$^{-1}$ s$^{-1}$
+    cb_label: IVT (kg m$^{-1}$ s$^{-1}$)
     cflevs:
     - 100
-    - 401
-    - 25
+    - 500
+    - 50
     clevs: null
     cmap: cmo.deep
     fig_name_prefix: ar_types_ivt_
@@ -172,7 +172,7 @@ ivt_anom:
     - 120.0
     - 0.0
     - 50.0
-    cb_label: kg m$^{-1}$ s$^{-1}$
+    cb_label: IVT (kg m$^{-1}$ s$^{-1}$)
     cflevs:
     - 10
     - 180
@@ -193,7 +193,7 @@ ivt_diff:
     - 120.0
     - 0.0
     - 50.0
-    cb_label: kg m$^{-1}$ s$^{-1}$
+    cb_label: IVT (kg m$^{-1}$ s$^{-1}$)
     cflevs:
     - 10
     - 180
