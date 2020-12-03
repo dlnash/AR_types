@@ -112,3 +112,33 @@ def select_months(df, mon_s, mon_e):
     
     return df 
 
+def create_list_all_dates(start_date, end_date, date_lst):
+    """
+    From a list of dates, create an array of zeros and ones 
+    where ones are where the conditions are true 
+    
+    Parameters
+    ----------
+    start_date : str
+        start date of list
+    end_date : str
+        end date of list
+    date_lst : array of datetimes
+        list of datetimes where conditions are true
+    
+    Returns
+    -------
+    arr_allDays : numpy array
+        numpy array where the dates where the condition is true is ones
+    
+    """
+    # date array with all days
+    dates_allDays = pd.date_range(start=start_date, end=end_date, freq='1D')
+    arr_allDays = np.zeros(len(dates_allDays), dtype=np.float)
+
+    # Loop over ar days and match to ar_full 
+    for i, date in enumerate(date_lst):
+        idx = np.where(dates_allDays == date)
+        arr_allDays[idx] = 1
+    
+    return arr_allDays

@@ -92,9 +92,9 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
     else:
         gl = ax.gridlines(crs=mapcrs, draw_labels=True,
                       linewidth=.5, color='black', alpha=0.5, linestyle='--')
-        gl.xlabels_top = False
-        gl.ylabels_left = left_lats
-        gl.ylabels_right = right_lats
+        gl.top_labels = False
+        gl.left_labels = left_lats
+        gl.right_labels = right_lats
         gl.xlocator = mticker.FixedLocator(xticks)
         gl.ylocator = mticker.FixedLocator(yticks)
         gl.xformatter = LONGITUDE_FORMATTER

@@ -211,11 +211,11 @@ ivt_diff:
 djf:
     day_e: '28'
     day_s: '01'
-    end_date: '2018-02-28'
+    end_date: '2018-02-28 9:00'
     mon_e: 2
     mon_s: 12
     ssn: djf
-    start_date: '1979-12-01'
+    start_date: '1979-12-01 9:00'
     ye: 2018
     ys: 1979
 
@@ -223,11 +223,11 @@ djf:
 mam:
     day_e: '31'
     day_s: '01'
-    end_date: 2018-5-31
+    end_date: '2018-5-31 9:00'
     mon_e: 5
     mon_s: 3
     ssn: mam
-    start_date: '1979-03-01'
+    start_date: '1979-03-01 9:00'
     ye: 2018
     ys: 1979
 
@@ -235,11 +235,11 @@ mam:
 djfmam:
     day_e: '31'
     day_s: '01'
-    end_date: 2018-5-31
+    end_date: '2018-05-31 9:00'
     mon_e: 5
     mon_s: 12
     ssn: djfmam
-    start_date: '1979-03-01'
+    start_date: '1979-12-01 9:00'
     ye: 2018
     ys: 1979
     

@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples, silhouette_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -35,6 +36,12 @@ def plot_optimal_k(data, kmax, create_plot=False, filename=None):
         km = KMeans(n_clusters=kclusters[i])
         km = km.fit(data)
         cohesion[i] = (km.inertia_)
+    
+        # The silhouette_score gives the average value for all the samples.
+        # This gives a perspective into the density and separation of the formed
+        # clusters
+        silhouette_avg = silhouette_score(X, cluster_labels)
+    
     if create_plot == True:
         # Elbow plot
         fig, ax = plt.subplots()
