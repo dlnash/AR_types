@@ -36,16 +36,16 @@ upper_anom:
     - 120.0
     - 0.0
     - 65.0
-    cb_label: wind speed (kt)
+    cb_label: geopotential height (dm)
     cflevs:
-    - 0
-    - 43
-    - 6
+    - -10
+    - 12
+    - 2
     clevs:
     - -10
     - 11
     - 2
-    cmap: BuPu
+    cmap: RdBu_r
     fig_name_prefix: anom_ar_types_upper_
     fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     lev: 250.0
@@ -110,11 +110,11 @@ precip_anom:
     - 50.0
     cb_label: Precipitation (mm day$^{-1}$)
     cflevs:
-    - -6
+    - 0
     - 22
     - 2
     clevs: null
-    cmap: cmo.balance
+    cmap: Blues
     fig_name_prefix: anom_ar_types_prec_
     fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
     name: prec
@@ -174,17 +174,17 @@ ivt_anom:
     - 50.0
     cb_label: IVT (kg m$^{-1}$ s$^{-1}$)
     cflevs:
-    - 10
-    - 180
-    - 10
+    - 0
+    - 225
+    - 25
     clevs: null
     cmap: cmo.deep
     fig_name_prefix: anom_ar_types_ivt_
     fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     name: ivt
-    quiver_key: 25
-    quiver_key_lbl: 25 kg m$^{-1}$ s$^{-1}$
-    quiver_scale: 10
+    quiver_key: 50
+    quiver_key_lbl: 50 kg m$^{-1}$ s$^{-1}$
+    quiver_scale: 20
     
 ivt_diff:
     anom: anom

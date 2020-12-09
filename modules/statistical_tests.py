@@ -15,7 +15,7 @@ from scipy import stats
 from scipy.stats import ttest_1samp, t, pearsonr, norm, linregress
 import scipy.stats.distributions as dist
 
-def ttest_1samp(a, popmean, dim, n):
+def ttest_1samp_new(a, popmean, dim, n):
     """
     This is a two-sided test for the null hypothesis that the expected value
     (mean) of a sample of independent observations `a` is equal to the given
@@ -104,12 +104,12 @@ def independent_ttest(ds, group, alpha, n):
     # if abs(tvalue) >= cv, reject null hypothesis that the means are equal
     maskt_idx = (abs(tval) >= cv)
     
-    # find p-value based on tval and nprime (rather than n)
-    pval = t.sf(np.abs(tval), df)*2  # two-sided pvalue = Prob(abs(t)>tt)
-    # interpret via p-value
-    # if p < alpha, reject null hypothesis that the means are equal
-    maskp_idx = (pval < alpha)
-    return maskt_idx, maskp_idx
+#     # find p-value based on tval and nprime (rather than n)
+#     pval = t.sf(np.abs(tval), df)*2  # two-sided pvalue = Prob(abs(t)>tt)
+#     # interpret via p-value
+#     # if p < alpha, reject null hypothesis that the means are equal
+#     maskp_idx = (pval < alpha)
+    return maskt_idx
 
 def autocorr_diff(ts1, ts2):
     '''Calculate autocorrelation of the difference between two paired samples'''
