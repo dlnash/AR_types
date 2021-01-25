@@ -172,6 +172,30 @@ test6:
     - U
     - V
     - QV
+    
+test7:
+    domain:
+    - extenddomain
+    - extenddomain
+    - extenddomain
+    fnameID: HUV500extend
+    latlon:
+    - 20
+    - 120
+    - 0
+    - 50
+    levs:
+    - 500.0
+    name: test7
+    pathvar: huvq
+    varlev:
+    - 500.0
+    - 500.0
+    - 500.0
+    varlist:
+    - H
+    - U
+    - V
   
 eof_domain:
     extratropics:
@@ -189,5 +213,10 @@ eof_domain:
     - 120.0
     - -15.0
     - 25.0
+    extenddomain:
+    - 20.0
+    - 120.0
+    - 0.0
+    - 50.0
 
 ...

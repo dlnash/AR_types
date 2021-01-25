@@ -12,22 +12,26 @@ import matplotlib.pyplot as plt
 # module from this repository
 from node import Node
 
-def transition_matrix(transitions):
+def transition_matrix(transitions, step):
     '''
     the following code takes a list such as
     [1,1,2,6,8,5,5,7,8,8,1,1,4,5,5,0,0,0,1,1,4,4,5,1,3,3,4,5,4,1,1]
     with states labeled as successive integers starting with 0
     and returns a transition matrix, M,
     where M[i][j] is the probability of transitioning from i to j
+    and step is from state X(0) to state X(step)
     '''
     n = 1+ max(transitions) #number of states
 
-    M = [[0]*n for _ in range(n)]
-
-    for (i,j) in zip(transitions,transitions[1:]):
+    M = [[0]*n for _ in range(n)] # create empty transition matrix
+    
+    # counts the number of times state[i] = state[j]
+    for (i,j) in zip(transitions,transitions[step:]):
         M[i][j] += 1
 
-    #now convert to probabilities:
+    # now convert to probabilities:
+    # for each state[i], calculate the fraction of times 
+    # that state transitioned to state[j]
     for row in M:
         s = sum(row)
         if s > 0:

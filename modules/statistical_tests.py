@@ -333,24 +333,38 @@ def diff_proportion_zstat(df):
     '''
     AR_CATS = ('AR_CAT1', 'AR_CAT2', 'AR_CAT3', 'AR_ALL')
     TELE = ['AO', 'PDO', 'ENSO', 'SH']
-    zstat_array = []
-    pval_array = []
+    zstat_array1 = []
+    pval_array1 = []
+    
+    zstat_array2 = []
+    pval_array2 = []
+    
+    zstat_array3 = []
+    pval_array3 = []
     
     
     for i, tele in enumerate(TELE):
         
         s_positive = df.loc[(df[tele] > 0)]
         s_negative = df.loc[(df[tele] < 0)]
-
+        s_neutral = df.loc[(df[tele] == 0)]
+        
         for j, ar_type in enumerate(AR_CATS):
             zstat, pval = test_diff_proportion(s_positive[ar_type].values, s_negative[ar_type].values)
-        
-            zstat_array.append((zstat))
-            pval_array.append((pval))
-        
-            zstat_final = zstat_array 
-            pval_final = pval_array
+            zstat_array1.append((zstat))
+            pval_array1.append((pval))
+            
+            zstat2, pval2 = test_diff_proportion(s_positive[ar_type].values, s_neutral[ar_type].values)
+            zstat_array2.append((zstat2))
+            pval_array2.append((pval2))
+            
+            zstat3, pval3 = test_diff_proportion(s_negative[ar_type].values, s_neutral[ar_type].values)
+            zstat_array3.append((zstat3))
+            pval_array3.append((pval3))
+            
     
+    zstat_final = [zstat_array1, zstat_array2, zstat_array3]
+    pval_final = [pval_array1, pval_array2, pval_array3]
     return zstat_final, pval_final
 
 def build_zscore_df(df):
@@ -361,25 +375,17 @@ def build_zscore_df(df):
     
     arrays = [['AO']*4 + ['PDO']*4 + ['ENSO']*4 + ['SH']*4,
                ['AR_CAT1', 'AR_CAT2', 'AR_CAT3', 'AR_ALL'] * 4]
+    
     index = pd.MultiIndex.from_arrays(arrays, names=('Teleconnection', 'AR Type'))
-    df_z = pd.DataFrame({'zstat': z,
-                        'pval': p},
+    df_z1 = pd.DataFrame({'zstat': z[0],
+                        'pval': p[0]},
+                       index=index)
+    df_z2 = pd.DataFrame({'zstat': z[1],
+                        'pval': p[1]},
+                       index=index)
+    df_z3 = pd.DataFrame({'zstat': z[2],
+                        'pval': p[2]},
                        index=index)
     
+    df_z = [df_z1, df_z2, df_z3]
     return df_z
-
-def new_linregress(x, y):
-    # Wrapper around scipy linregress to use in apply_ufunc
-    slope, intercept, r_value, p_value, std_err = linregress(x, y)
-    return np.array([slope, intercept, r_value, p_value, std_err])
-
-def lin_regress(ds, x, y):
-    '''Wrapped scipy.stats.linregress to calculate slope, y-int, r-value, p-value, and standard error in xr.dataset form'''
-    return xr.apply_ufunc(new_linregress, ds[x], ds[y],
-                           input_core_dims=[['time'], ['time']],
-                           output_core_dims=[["parameter"]],
-                           vectorize=True,
-                           dask="parallelized",
-                           output_dtypes=['float64'],
-                           output_sizes={"parameter": 5},
-                      )

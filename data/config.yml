@@ -36,7 +36,7 @@ upper_anom:
     - 120.0
     - 0.0
     - 65.0
-    cb_label: geopotential height (dm)
+    cb_label: geopotential height (dam)
     cflevs:
     - -10
     - 12
@@ -131,9 +131,9 @@ precip_diff:
     - 50.0
     cb_label: Precipitation (mm day$^{-1}$)
     cflevs:
-    - 0
-    - 10
-    - 1
+    - -12
+    - 14
+    - 2
     clevs: null
     cmap: cmo.rain
     fig_name_prefix: non_anom_prec_diff_
@@ -211,36 +211,36 @@ ivt_diff:
 djf:
     day_e: '28'
     day_s: '01'
-    end_date: '2018-02-28 9:00'
+    end_date: '2019-02-28 9:00'
     mon_e: 2
     mon_s: 12
     ssn: djf
     start_date: '1979-12-01 9:00'
-    ye: 2018
+    ye: 2019
     ys: 1979
 
 # Option 2 - MAM only
 mam:
     day_e: '31'
     day_s: '01'
-    end_date: '2018-5-31 9:00'
+    end_date: '2019-5-31 9:00'
     mon_e: 5
     mon_s: 3
     ssn: mam
     start_date: '1979-03-01 9:00'
-    ye: 2018
+    ye: 2019
     ys: 1979
 
 # Option 3 - DJF and MAM combined
 djfmam:
     day_e: '31'
     day_s: '01'
-    end_date: '2018-05-31 9:00'
+    end_date: '2019-05-31 9:00'
     mon_e: 5
     mon_s: 12
     ssn: djfmam
     start_date: '1979-12-01 9:00'
-    ye: 2018
+    ye: 2019
     ys: 1979
     
 ...

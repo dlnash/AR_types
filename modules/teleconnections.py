@@ -30,6 +30,7 @@ def build_teleconnection_df(ref, col, start_date, end_date):
         ## Trim date range
         idx = (df.index >= start_date) & (df.index <= end_date + " 23:59:59")
         df = df.loc[idx]
+#         print(len(df))
         dfs.append(df)
 
     # create single df
@@ -83,10 +84,13 @@ def sh_index(ref, col):
     df = pd.read_csv(fname, engine='python')
     df = df.rename(columns={'Unnamed: 0': 'date', 'SH': 'ANOM'})
     df = df.set_index(pd.to_datetime(df.date))
+    # calc std dev of anomalies
+    pos_cond = df['ANOM'].std()*0.5
+    neg_cond = df['ANOM'].std()*-0.5
     # neutral = 0, positive = 1, negative = -1
     df['COND'] = 0
-    df.loc[df['ANOM']>0, 'COND'] = 1
-    df.loc[df['ANOM']<0, 'COND'] = -1
+    df.loc[df['ANOM']>pos_cond, 'COND'] = 1
+    df.loc[df['ANOM']<neg_cond, 'COND'] = -1
     
     if ref == 'seasonal':
         df = df[col]
@@ -123,13 +127,15 @@ def ao_index(ref, col):
         names=['YEAR', 'MON', 'DAY', 'ANOM']
         df = pd.read_csv(path_to_data + fname_daily,
                         delim_whitespace=True, engine='python', header=0, names=names)
-
+        # calc std dev of anomalies
+        pos_cond = df['ANOM'].std()*0.5
+        neg_cond = df['ANOM'].std()*-0.5
         # neutral = 0, positive = 1, negative = -1
         df['COND'] = 0
-        df.loc[df['ANOM']>0, 'COND'] = 1
-        df.loc[df['ANOM']<0, 'COND'] = -1
+        df.loc[df['ANOM']>pos_cond, 'COND'] = 1
+        df.loc[df['ANOM']<neg_cond, 'COND'] = -1
 
-        df['date'] = pd.date_range('1950-01-02 9:00:00', '2019-02-28 9:00:00', freq='1D')
+        df['date'] = pd.date_range('1950-01-02 9:00:00', '2020-12-31 9:00:00', freq='1D')
         df = df.set_index('date')
         
     elif ref == 'seasonal':
@@ -140,10 +146,13 @@ def ao_index(ref, col):
         df = df.set_index('date')
         
         df = df.resample('QS-DEC').mean()
-        # reset conditions neutral=0, positive=1, negative=-1
+        # calc std dev of anomalies
+        pos_cond = df['ANOM'].std()*0.5
+        neg_cond = df['ANOM'].std()*-0.5
+        # neutral = 0, positive = 1, negative = -1
         df['COND'] = 0
-        df.loc[df['ANOM']>0, 'COND'] = 1
-        df.loc[df['ANOM']<0, 'COND'] = -1
+        df.loc[df['ANOM']>pos_cond, 'COND'] = 1
+        df.loc[df['ANOM']<neg_cond, 'COND'] = -1
 
     return df[col]
 
@@ -155,20 +164,26 @@ def pdo_index(ref, col):
     df['date'] = pd.date_range('1854-01', '2020-07', freq='MS')
     df = df.rename(columns={'Value': 'ANOM'})
     df = df.set_index('date')
-    # set conditions neutral=0, nino=1, nina=2
+    # calc std dev of anomalies
+    pos_cond = df['ANOM'].std()*0.5
+    neg_cond = df['ANOM'].std()*-0.5
+    # neutral = 0, positive = 1, negative = -1
     df['COND'] = 0
-    df.loc[df['ANOM']>0, 'COND'] = 1
-    df.loc[df['ANOM']<0, 'COND'] = -1
+    df.loc[df['ANOM']>pos_cond, 'COND'] = 1
+    df.loc[df['ANOM']<neg_cond, 'COND'] = -1
 
     if ref == 'monthly':
         df = df[col]
     
     elif ref == 'seasonal':
         df = df.resample('QS-DEC').mean()
-        # reset conditions neutral=0, positive=1, negative=-1
+        # calc std dev of anomalies
+        pos_cond = df['ANOM'].std()*0.5
+        neg_cond = df['ANOM'].std()*-0.5
+        # neutral = 0, positive = 1, negative = -1
         df['COND'] = 0
-        df.loc[df['ANOM']>0, 'COND'] = 1
-        df.loc[df['ANOM']<0, 'COND'] = -1
+        df.loc[df['ANOM']>pos_cond, 'COND'] = 1
+        df.loc[df['ANOM']<neg_cond, 'COND'] = -1
         df = df[col]
         
     elif ref == 'daily':

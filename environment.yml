@@ -27,6 +27,7 @@ dependencies:
  # pip packages
   - pip:
     - jupyterthemes
+    - latextable
 
 
       

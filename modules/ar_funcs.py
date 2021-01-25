@@ -22,7 +22,8 @@ def resample_track_id(df):
     # stack up 3 subregions id numbers
     d = {'r01id': df['R01_id'],
          'r02id': df['R02_id'],
-         'r03id': df['R03_id']}
+         'r03id': df['R03_id'],
+         'r04id': df['R04_id']}
 
     df_tmp = pd.DataFrame(data=d)
     ## combine into single series
@@ -72,7 +73,7 @@ def preprocess_ar_area_subregions(df, thres):
     df = df.resample('1D').mean()
     ## manually add column back into resampled df with area covered
     df['track_id'] = track_ids
-    df = df.drop(columns=['R01_id', 'R02_id', 'R03_id'])
+    df = df.drop(columns=['R01_id', 'R02_id', 'R03_id', 'R04_id'])
     
     # Add column of AR days based on threshold
     # (no AR day eq 0; AR day eq 1)
@@ -107,6 +108,40 @@ def preprocess_ar_area_subregions(df, thres):
     
     return df
 
+def preprocess_ar_SASIA(df, thres):
+    '''
+    Returns dataframe encoded for AR Days and identifies trackID of AR.
+    
+    Parameters
+    ----------
+    df : pandas dataframe
+        dataframe that has subregion where percentage of area of AR is given for each day
+    threshold: number, float
+        singular threshold used for the percentage of area covered by an AR
+        
+    Returns
+    -------
+    df : pandas dataframe
+        df that indicates whether each time step is an AR day and the location of the AR
+    '''
+    ## drop lev and ens cols
+    df = df.drop(columns=['lev', 'ens'])
+    ## Get single AR ID for each day
+    track_ids = resample_track_id(df)
+    
+    # resample to daily
+    df = df.resample('1D').mean()
+    ## manually add column back into resampled df with area covered
+    df['track_id'] = track_ids
+    df = df.drop(columns=['R01_id', 'R02_id', 'R03_id', 'R04_id'])
+    
+    # Add column of AR days based on threshold
+    # (no AR day eq 0; AR day eq 1)
+    df['ar'] = 0
+    idx = (df['R04'] > thres)
+    df.loc[idx, 'ar'] = 1
+    
+    return df
 
 def ar_climatology(dataarray, threshold):
     '''
@@ -123,12 +158,18 @@ def ar_climatology(dataarray, threshold):
     -------
     day_list : 1D array, float
         list of datetime objects that an AR covered threshold*100% of the subregion's area
+    mon_ct : 1D array, float
+        array of count of ARs per month in the time series
+    clim_ct : 1D array, float
+        array of size 12 with the total number of ARs per month
     '''
     mask = dataarray.where(dataarray >= threshold).dropna(dim='time')
     mask = mask.resample(time='1D').mean()
     day_list = mask.dropna(dim='time').time
+    mon_ct = mask.resample(time='1MS').count()
+    clim_ct = mask.groupby('time.month').count('time')
                            
-    return day_list
+    return day_list, mon_ct, clim_ct
 
 def add_ar_time_series(ds, df):
     '''Add AR time series to ds; set as coordinate variables'''
