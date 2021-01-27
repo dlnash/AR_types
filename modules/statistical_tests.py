@@ -12,7 +12,7 @@ import pandas as pd
 import xarray as xr
 import xarray.ufuncs as xrf
 from scipy import stats
-from scipy.stats import ttest_1samp, t, pearsonr, norm, linregress
+from scipy.stats import ttest_1samp, t, pearsonr, norm, linregress, ttest_ind_from_stats
 import scipy.stats.distributions as dist
 
 def ttest_1samp_new(a, popmean, dim, n):
@@ -121,6 +121,9 @@ def autocorr_diff(ts1, ts2):
     df = pd.DataFrame(data)
     rho1 = df.diff_ts.autocorr(lag=1)
     
+    # put into xarray ds
+    
+    
     return rho1
     
 def n_prime(ts1, ts2):
@@ -136,7 +139,7 @@ def n_prime(ts1, ts2):
     
     return rho1, nprime
 
-def ttest_autocorrelation(ts1, ts2, alpha):
+def ttest_autocorrelation(ts1, ts2, alpha, autocorr=True):
     '''find pvalue and tvalue based on more stringent nprime (lag1 autocorrelation of 2 time series)
        for 2 sample 2-sided t-test
     '''
@@ -148,8 +151,16 @@ def ttest_autocorrelation(ts1, ts2, alpha):
         n = len(ts1)
     df = n-2
     
+    #find variance for each group
+    var1 = np.var(ts1)
+    var2 = np.var(ts2)
+    if var2/var1 < 4:
+        eq_var = True
+    else: 
+        eq_var = False
+        
     # calculate t-statistic and p-value
-    tval, pval = ttest_ind(ts1, ts2)
+    tval, pval = ttest_ind(ts1, ts2, equal_var=eq_var)
     # calculate the critical value
     cv = t.ppf(1.0 - alpha, df)
 #     print('Critical t-value: ', cv)
@@ -389,3 +400,45 @@ def build_zscore_df(df):
     
     df_z = [df_z1, df_z2, df_z3]
     return df_z
+
+def _test_ind_from_stats_ufunc(mean1, std1, nobs1, mean2, std2, nobs2, equal_var=False, dims=['lat', 'lon']):
+    """ufunc to wrap scipy.stats.ttest_ind_from_stats for xr_ttest_2samp"""
+    return xr.apply_ufunc(ttest_ind_from_stats, # function
+                          mean1, std1, nobs1, mean2, std2, nobs2, equal_var, # now arguments in order
+                          input_core_dims=[dims, dims, [], dims, dims, [], []],  # list with one entry per arg
+                          output_core_dims=[dims, dims], # size out output 
+                          dask='allowed')
+
+def xr_ttest_ind_from_stats(data1, data2):
+    '''
+       Adapted from https://github.com/jbusecke/xarrayutils/blob/7b09a2bdc70f035e290e75419c2d025b7267adf4/xarrayutils/utils.py#L52
+       
+    Parameters
+    ----------
+    data1 : xarray ds
+        sample 1
+    data2: xarray ds
+        sample 2
+        
+    Returns
+    -------
+    tvalue : array_like, float
+        xarray ds object with same vars as data1 that has the tvalue for the two-sample t-test
+    pvalue : array_like, float
+        xarray ds object with same vars as data1 that has the pvalue for the two-sample t-test 
+        
+    '''
+    mean1 = data1.mean('time')
+    mean2 = data2.mean('time')
+    std1 = data1.std('time')
+    std2 = data2.std('time')
+    nobs1 = len(data1.time)
+    nobs2 = len(data2.time)
+    
+    diff = mean1-mean2
+    
+    tstat, pval = _test_ind_from_stats_ufunc(mean1, std1, nobs1, mean2, std2, nobs2)
+    
+    return diff, pval
+
+
