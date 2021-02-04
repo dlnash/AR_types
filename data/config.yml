@@ -72,7 +72,7 @@ upper_diff:
     - 2
     cmap: BuPu
     fig_name_prefix: non_anom_upper_diff_
-    fname: ERA5/huvq/daily/out.era5_hma_05dg_daily_huvq_*.nc
+    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     lev: 250.0
     name: huv250
     quiver_key: 10
@@ -137,7 +137,7 @@ precip_diff:
     clevs: null
     cmap: cmo.rain
     fig_name_prefix: non_anom_prec_diff_
-    fname: ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc
+    fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
     name: prec
     quiver_key: null
     quiver_key_lbl: null
@@ -201,7 +201,7 @@ ivt_diff:
     clevs: null
     cmap: cmo.deep
     fig_name_prefix: non_anom_ivt_diff_
-    fname: ERA5/ivt/daily/out.era5*.nc
+    fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     name: ivt
     quiver_key: 25
     quiver_key_lbl: 25 kg m$^{-1}$ s$^{-1}$

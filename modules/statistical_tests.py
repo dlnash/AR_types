@@ -401,6 +401,25 @@ def build_zscore_df(df):
     df_z = [df_z1, df_z2, df_z3]
     return df_z
 
+def _unequal_var_ttest_denom(v1, n1, v2, n2):
+    vn1 = v1 / n1
+    vn2 = v2 / n2
+    with np.errstate(divide='ignore', invalid='ignore'):
+        df = (vn1 + vn2)**2 / (vn1**2 / (n1 - 1) + vn2**2 / (n2 - 1))
+
+#     # If df is undefined, variances are zero (assumes n1 > 0 & n2 > 0).
+#     # Hence it doesn't matter what df is as long as it's not NaN.
+#     df = np.where(np.isnan(df), 1, df)
+#     denom = np.sqrt(vn1 + vn2)
+    return df
+
+
+def _equal_var_ttest_denom(v1, n1, v2, n2):
+    df = n1 + n2 - 2.0
+    svar = ((n1 - 1) * v1 + (n2 - 1) * v2) / df
+    denom = np.sqrt(svar * (1.0 / n1 + 1.0 / n2))
+    return df, denom
+
 def _test_ind_from_stats_ufunc(mean1, std1, nobs1, mean2, std2, nobs2, equal_var=False, dims=['lat', 'lon']):
     """ufunc to wrap scipy.stats.ttest_ind_from_stats for xr_ttest_2samp"""
     return xr.apply_ufunc(ttest_ind_from_stats, # function
@@ -433,11 +452,18 @@ def xr_ttest_ind_from_stats(data1, data2):
     std1 = data1.std('time')
     std2 = data2.std('time')
     nobs1 = len(data1.time)
+    print('Number of observations sample 1: ', nobs1)
     nobs2 = len(data2.time)
+    print('Number of observations sample 2: ', nobs2)
     
     diff = mean1-mean2
-    
     tstat, pval = _test_ind_from_stats_ufunc(mean1, std1, nobs1, mean2, std2, nobs2)
+
+    df, denom = _equal_var_ttest_denom(std1**2, nobs1, std2**2, nobs2)
+    print('If equal_var = True, Degrees of freedom: ', df)
+    
+    df = _unequal_var_ttest_denom(std1**2, nobs1, std2**2, nobs2)
+    print('If equal_var = False, Degrees of freedom: ', df)
     
     return diff, pval
 

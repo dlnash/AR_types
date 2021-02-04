@@ -131,7 +131,22 @@ def add_subregion_boxes(ax, subregion_xy, width, height, ecolor, datacrs):
                                         fill=False,
                                         edgecolor=ecolor,
                                         linewidth=1.0,
-                                        transform=datacrs))
+                                        transform=datacrs,
+                                        zorder=100))
+        
+    return ax
+
+def add_hasia_labels(ax, fntsize=7):        
+    # Add text to highlight locations.
+    txtbx = dict(fill=True, edgecolor='black', linewidth=0,alpha=0.3, zorder=101)
+    kws = {'color': 'white', 'fontsize': fntsize, 'bbox': txtbx, 'ha': 'left', 'va': 'bottom'}
+    xcoords = [68.00, 75.42, 75.00, 75.00, 81.09, 89.82, 71.03]
+    ycoords = [35.78, 41.16, 35.69, 32.50, 29.00, 27.87, 38.35]
+    txtlbl = ['Hindu Kush', 'Tien Shan', 'Karakoram', 'Western Himalaya', 'Central Himalaya', 'Eastern Himalaya', 'Pamirs']
+    for i in range(len(txtlbl)):
+        ax.text(xcoords[i], ycoords[i], txtlbl[i],**kws)
+        
+    return ax
         
 def plot_maxmin_points(lon, lat, data, extrema, nsize, symbol, color='k',
                        plotValue=True, transform=None):
@@ -175,7 +190,8 @@ def plot_maxmin_points(lon, lat, data, extrema, nsize, symbol, color='k',
                 color=color, size=8, clip_on=True, fontweight='bold',
                 horizontalalignment='center', verticalalignment='center', 
                 transform=transform, zorder=10)
-       
+        
+    return ax
 
 def loadCPT(path):
     """A function that loads a .cpt file and converts it into a colormap for the colorbar.

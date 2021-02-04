@@ -10,40 +10,6 @@ import os, sys
 import numpy as np
 import pandas as pd
 
-        
-def build_teleconnection_df(ref, col, start_date, end_date):
-    '''
-    Gets all available indices and compiles them into single dataframe.
-    ref - frequency ('monthly', 'daily', 'seasonal')
-    col - column variable from index ('ANOM' or 'COND')
-    '''
-    # Pull all indices together
-    df_sh = sh_index(ref, col) # SH
-    df_ao = ao_index(ref, col) # AO
-    df_pdo = pdo_index(ref, col) # PDO
-    df_enso = enso_index(ref, col) # ENSO
-    ## put all indices into list
-    df_list = [df_ao, df_pdo, df_enso, df_sh]
-    ## Loop through list to clip to start date and end date
-    dfs = []
-    for k, df in enumerate(df_list):
-        ## Trim date range
-        idx = (df.index >= start_date) & (df.index <= end_date + " 23:59:59")
-        df = df.loc[idx]
-#         print(len(df))
-        dfs.append(df)
-
-    # create single df
-    data = {'date':  dfs[0].index,
-            'AO':    dfs[0].values,
-            'PDO':   dfs[1].values,
-            'ENSO':  dfs[2].values,
-            'SH':    dfs[3].values}
-
-    df_index = pd.DataFrame(data)
-    df_index = df_index.set_index('date')
-    
-    return df_index
 
 def fill_df_all_dates(df, start_date, end_date, ref, col):
     if ref == 'seasonal':
@@ -142,7 +108,7 @@ def ao_index(ref, col):
         names=['YEAR', 'MON', 'DAY', 'ANOM']
         df = pd.read_csv(path_to_data + fname_daily,
                         delim_whitespace=True, engine='python', header=0, names=names)
-        df['date'] = pd.date_range('1950-01-02 9:00:00', '2019-02-28 9:00:00', freq='1D')
+        df['date'] = pd.date_range('1950-01-02 9:00:00', '2020-12-31 9:00:00', freq='1D')
         df = df.set_index('date')
         
         df = df.resample('QS-DEC').mean()
@@ -230,3 +196,37 @@ def enso_index(ref, col):
         df = fill_df_all_dates(df, df.index[0], df.index[-1], ref, col)
 
     return df
+
+def build_teleconnection_df(ref, col, start_date, end_date):
+    '''
+    Gets all available indices and compiles them into single dataframe.
+    ref - frequency ('monthly', 'daily', 'seasonal')
+    col - column variable from index ('ANOM' or 'COND')
+    '''
+    # Pull all indices together
+    df_sh = sh_index(ref, col) # SH
+    df_ao = ao_index(ref, col) # AO
+    df_pdo = pdo_index(ref, col) # PDO
+    df_enso = enso_index(ref, col) # ENSO
+    ## put all indices into list
+    df_list = [df_ao, df_pdo, df_enso, df_sh]
+    ## Loop through list to clip to start date and end date
+    dfs = []
+    for k, df in enumerate(df_list):
+        ## Trim date range
+        idx = (df.index >= start_date) & (df.index <= end_date + " 23:59:59")
+        df = df.loc[idx]
+#         print(len(df))
+        dfs.append(df)
+
+    # create single df
+    data = {'date':  dfs[0].index,
+            'AO':    dfs[0].values,
+            'PDO':   dfs[1].values,
+            'ENSO':  dfs[2].values,
+            'SH':    dfs[3].values}
+
+    df_index = pd.DataFrame(data)
+    df_index = df_index.set_index('date')
+    
+    return df_index
