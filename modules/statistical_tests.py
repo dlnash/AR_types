@@ -330,7 +330,7 @@ def test_diff_proportion(ts1, ts2):
     p2 = y2/n2 # proportion of sample 2
     phat = (y1+y2)/(n1 + n2)
     
-    std_err = np.sqrt(phat*(1-phat)*(1/n1 + 1/n2))
+    std_err = np.sqrt((phat*(1-phat))*((1/n1) + (1/n2)))
     Z = ((p1 - p2) - 0)/(std_err)
     
     # Calculate the  p-value
