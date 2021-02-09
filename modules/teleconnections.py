@@ -197,6 +197,36 @@ def enso_index(ref, col):
 
     return df
 
+def mjo_index(ref, start_date, end_date):
+    '''create a pandas df of the Madden Julian Oscillation index 
+    on daily, monthly, or seasonal timescale 
+    with yes MJO phase as positive, no MJO phase as negative
+    '''
+    path_to_data = '/home/nash/DATA/data/teleconnection_indices/'
+    fname_daily = path_to_data + 'mjo.events.ouu.1979.2019.txt'
+    df = pd.read_csv(fname_daily, delim_whitespace=True, engine='python')
+    df['date'] = pd.date_range('1979-01-01 9:00:00', '2019-12-31 9:00:00', freq='1D')
+    df = df.set_index('date')
+    
+    if ref == 'daily':
+        # (yes MJO) positive = 1, (no MJO) negative = -1
+        df['COND'] = 0
+        idx = (df['PHA']>0) & (df['AMPLITUDE']>1)
+        df.loc[idx, 'COND'] = 1
+        df.loc[df['PHA']==0, 'COND'] = -1
+
+    elif ref == 'monthly':
+        print('No monthly capabilities yet')
+        
+    elif ref == 'seasonal':
+        print('No seasonal capabilities yet')
+    
+    # trim to start_date, end_date
+    idx = (df.index >= start_date) & (df.index <= end_date + " 23:59:59")
+    df = df.loc[idx]
+        
+    return df
+
 def build_teleconnection_df(ref, col, start_date, end_date):
     '''
     Gets all available indices and compiles them into single dataframe.

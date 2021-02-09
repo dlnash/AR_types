@@ -196,7 +196,31 @@ test7:
     - H
     - U
     - V
-  
+
+test8:
+    domain:
+    - fulldomain
+    - fulldomain
+    - fulldomain
+    fnameID: HUV500_10ARSUB
+    latlon:
+    - 0
+    - 120
+    - 0
+    - 50
+    levs:
+    - 500.0
+    name: test4
+    pathvar: huvq
+    varlev:
+    - 500.0
+    - 500.0
+    - 500.0
+    varlist:
+    - H
+    - U
+    - V
+    
 eof_domain:
     extratropics:
     - 0.0
@@ -218,5 +242,6 @@ eof_domain:
     - 120.0
     - 0.0
     - 50.0
+
 
 ...

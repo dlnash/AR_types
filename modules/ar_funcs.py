@@ -218,3 +218,33 @@ def calc_seasonal_contribution(ds_list, df, prec_var, mon_s, mon_e):
         ds_clim_lst.append(ds_clim[prec_var[k]].values)
     
     return ds_clim_lst, ds_frac_lst, ds_std_lst
+
+def ar_daily_df(ssn, nk, out_path):
+    
+    filepath = out_path + 'AR-types_ALLDAYS.csv'
+    df = pd.read_csv(filepath)
+
+    # set up datetime index
+    df = df.rename(columns={'Unnamed: 0': 'date'})
+    df = df.set_index(pd.to_datetime(df.date))
+    
+    ## Break up columns into different AR Types
+    keys = []
+    for k in range(nk):
+        keys.append("AR_CAT{:1d}".format(k+1,))
+
+    values = np.zeros((len(df.index)))
+    dicts = dict(zip(keys, values))
+
+    df_cat = pd.DataFrame(dicts, index=df.index)
+
+    for k in range(nk):
+        idx = (df['AR_CAT'] == k+1)
+        col = "AR_CAT{:1d}".format(k+1,)
+        df_cat.loc[idx, col] = 1
+        
+    # get total of all AR types
+    df_cat['AR_ALL'] = df_cat['AR_CAT1'] + df_cat['AR_CAT2'] + df_cat['AR_CAT3']
+    df_cat['AR_CAT'] = df['AR_CAT']
+    
+    return df_cat
