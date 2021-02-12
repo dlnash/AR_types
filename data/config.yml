@@ -225,8 +225,8 @@ iwv_diff:
     fig_name_prefix: anom_iwv_diff_
     fname: ERA5/iwv/anomalies/daily_filtered_anomalies_iwv_*.nc
     name: iwv
-    quiver_key: 1
-    quiver_key_lbl: 1 m s$^{-1}$
+    quiver_key: 2
+    quiver_key_lbl: 2 m s$^{-1}$
     quiver_scale: 1
 
 lower_diff:
@@ -248,8 +248,8 @@ lower_diff:
     cmap: BuPu
     fig_name_prefix: anom_lower_diff_
     fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
-    lev: 850.0
-    name: huv850
+    lev: 500.0
+    name: huv500
     quiver_key: 2
     quiver_key_lbl: 2 m s$^{-1}$
     quiver_scale: 1
