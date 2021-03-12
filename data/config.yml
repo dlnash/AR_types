@@ -195,17 +195,17 @@ ivt_diff:
     - 50.0
     cb_label: IVT (kg m$^{-1}$ s$^{-1}$)
     cflevs:
-    - 10
-    - 180
-    - 10
+    - -80
+    - 100
+    - 20
     clevs: null
-    cmap: cmo.deep
+    cmap: BrBG
     fig_name_prefix: non_anom_ivt_diff_
     fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     name: ivt
-    quiver_key: 25
-    quiver_key_lbl: 25 kg m$^{-1}$ s$^{-1}$
-    quiver_scale: 10
+    quiver_key: 20
+    quiver_key_lbl: 20 kg m$^{-1}$ s$^{-1}$
+    quiver_scale: 8
 
 # 4) IWV and 850 hPa wind plots
 iwv_diff:
