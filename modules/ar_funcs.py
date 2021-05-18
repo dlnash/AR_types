@@ -143,6 +143,73 @@ def preprocess_ar_SASIA(df, thres):
     
     return df
 
+def preprocess_ar_bbox(ds, start_date, end_date, bbox):
+        lat1, lat2, lon1, lon2 = bbox
+        # select lats, lons, and dates within start_date, end_date and months
+        ds = ds.sel(time=slice(start_date, end_date), lat=slice(lat1,lat2), lon=slice(lon1,lon2))
+        # convert dataset to dataframe
+        df = ds.kidmap.to_dataframe(dim_order=['time', 'lat', 'lon'])
+        df = df.dropna(axis='rows')
+        # keep only rows that have trackID
+        new_df = df.groupby('time').kidmap.unique()
+        trackID = new_df
+
+        # create list of days that have an AR
+        date_lst = new_df.index.normalize().unique()
+        date_lst = date_lst + pd.DateOffset(hours=9)
+        
+        # Create AR dataframe
+        arr_ARDays = np.ones(len(date_lst), dtype=np.int)
+        tmp = pd.DataFrame({'ar':arr_ARDays, 'time':date_lst})
+
+        # Create dataframe with all days
+        dates_allDays = pd.date_range(start=start_date, end=end_date, freq='1D')
+        arr_allDays = np.empty(len(dates_allDays), dtype=np.int)*np.nan
+        ar_dates = pd.DataFrame({'time':dates_allDays}, index=dates_allDays)
+
+        # merge dfs together
+        df = pd.merge(ar_dates, tmp, how='outer', on='time')
+        df['ar'] = df['ar'].fillna(0)
+        # set time as index
+        df = df.set_index(df.time)
+        ar_dates = df.drop(['time'], axis=1)
+        
+        return trackID, ar_dates
+        
+def get_ar_days(reanalysis, start_date, end_date, subregions=False, bbox=None, thresh=None):
+    path_to_data = '/home/sbarc/students/nash/data/ar_catalog/'
+    if subregions == True:
+        # Open AR dataset (subregions with area covered by AR)
+        if reanalysis == 'era5':
+            filename = 'ar_catalog_v3_ERAI_fraction_HASIAsubregions.nc'
+        ## if MERRA2
+        else:
+            filename = 'ar_catalog_fraction_HASIAsubregions.nc'
+
+        f1 = path_to_data + 'CH1_generated_data/' + filename
+        ds = xr.open_dataset(f1)
+        # Set dates
+        ds = ds.sel(time=slice(start_date, end_date))
+        ## Preprocess AR subregions - get dataframe of AR days based on area threshold
+        ar_dates = preprocess_ar_area_subregions(df=ds.to_dataframe(), thres=thresh)
+        trackID = ar_dates.track_id
+    
+    elif subregions == False:
+    
+        if reanalysis == 'era5':
+            filename =  'globalARcatalog_ERA-Interim_1979-2019_v3.0.nc'
+        elif reanalysis == 'merra2':
+            filename = 'globalARcatalog_MERRA2_1980-2019_v3.0.nc'
+
+        # open ds
+        ds = xr.open_dataset(path_to_data + filename, engine='netcdf4')
+        ds = ds.squeeze()
+        # remove lev and ens coords
+        ds = ds.reset_coords(names=['lev', 'ens'], drop=True)
+        trackID, ar_dates = preprocess_ar_bbox(ds, start_date, end_date, bbox)
+
+    return trackID, ar_dates
+
 def ar_climatology(dataarray, threshold):
     '''
     Returns list array of dates considered AR days based on the input subregion.

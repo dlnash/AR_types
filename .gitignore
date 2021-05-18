@@ -5,3 +5,7 @@
 __pycache__/
 # ignore png files
 *.png
+/fig/*.png
+/out/*
+out/*
+

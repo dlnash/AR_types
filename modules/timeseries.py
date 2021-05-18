@@ -77,6 +77,39 @@ def persistence(x):
     
     return event_id, nevents, duration
 
+def persist_and_duration_stats(x):
+    '''
+    Count number of independent AR events and their duration in days
+    
+    Parameters
+    ----------
+    x : array_like
+        Binary time series of x=0 or x=1
+        
+    Returns
+    -------
+    sizes : array_like, int
+        2 lists one with number of days of duration, one with number of ARs in that duration bin   
+        
+    Example
+    -------
+    Returns:
+        sizes   = [[ 1.  2.  3.  4.  5.  7.]
+                   [95. 69. 21. 11.  4.  1.]]
+    '''
+    event_id, nevents, duration = persistence(x.ar)
+    print('Total number of AR days in season: ', x.ar.sum())
+    print('Total number of independent AR events: ', nevents)
+    duration_freq = np.array(np.unique(duration, return_counts=True))
+    print(duration_freq)
+    bins = np.array([[1, 1], [2, 2], [3, 4], [5, 10]])
+    sizes = []
+    for i, b in enumerate(bins):
+        idx = np.where((duration_freq[0] >= b[0]) & (duration_freq[0] <= b[1]))
+        sizes.append((duration_freq[1][idx].sum()/nevents)*100)
+    print(sizes)
+    
+    return sizes
 
 #### CLEAN UP AND ADD DOC STRINGS ###
 def transition_matrix(x, states):

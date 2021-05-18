@@ -2,6 +2,7 @@
 
 """
 
+import os
 import numpy as np
 
 # Adapter.py when remapping coordinate variables
