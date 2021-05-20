@@ -1,11 +1,12 @@
-# Filename:    config.yml
+# Filename:    plt_config.yml
 # Author:      Deanna Nash, dlnash@ucsb.edu
-# Description: Configuration arguments for using different variables, seasons, etc.
+# Description: Configuration arguments for plotting different variables, seasons, etc.
 
 ---
 # Upper Level Plot Configuration
 upper_non_anom:
     anom: nanom
+    varname: huvq
     bnds:
     - 30.0
     - 120.0
@@ -22,7 +23,6 @@ upper_non_anom:
     - 12
     cmap: BuPu
     fig_name_prefix: ar_types_upper_
-    fname: ERA5/huvq/daily/out.era5_hma_05dg_daily_huvq_*.nc
     lev: 250.0
     name: huv250
     quiver_key: 25
@@ -31,6 +31,7 @@ upper_non_anom:
 
 upper_anom:
     anom: anom
+    varname: huvq
     bnds:
     - 30.0
     - 120.0
@@ -47,7 +48,6 @@ upper_anom:
     - 2
     cmap: RdBu_r
     fig_name_prefix: anom_ar_types_upper_
-    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     lev: 250.0
     name: huv250
     quiver_key: 10
@@ -56,6 +56,7 @@ upper_anom:
     
 upper_diff:
     anom: anom
+    varname: huvq
     bnds:
     - 30.0
     - 120.0
@@ -72,7 +73,6 @@ upper_diff:
     - 2
     cmap: RdBu_r
     fig_name_prefix: non_anom_upper_diff_
-    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     lev: 250.0
     name: huv250
     quiver_key: 10
@@ -82,6 +82,7 @@ upper_diff:
 # 2) Precip Plots
 precip_non_anom:
     anom: nanom
+    varname: prec
     bnds:
     - 40.0
     - 120.0
@@ -95,7 +96,6 @@ precip_non_anom:
     clevs: null
     cmap: cmo.rain
     fig_name_prefix: ar_types_prec_
-    fname: ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc
     name: prec
     quiver_key: null
     quiver_key_lbl: null
@@ -103,6 +103,7 @@ precip_non_anom:
 
 precip_anom:
     anom: anom
+    varname: prec
     bnds:
     - 40.0
     - 120.0
@@ -116,7 +117,6 @@ precip_anom:
     clevs: null
     cmap: Blues
     fig_name_prefix: anom_ar_types_prec_
-    fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
     name: prec
     quiver_key: null
     quiver_key_lbl: null
@@ -124,6 +124,7 @@ precip_anom:
     
 precip_diff:
     anom: anom
+    varname: prec
     bnds:
     - 40.0
     - 120.0
@@ -137,7 +138,6 @@ precip_diff:
     clevs: null
     cmap: RdBu_r
     fig_name_prefix: anom_prec_diff_
-    fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
     name: prec
     quiver_key: null
     quiver_key_lbl: null
@@ -146,6 +146,7 @@ precip_diff:
 # 3) IVT plots
 ivt_non_anom:
     anom: nanom
+    varname: ivt
     bnds:
     - 45.0
     - 120.0
@@ -159,7 +160,6 @@ ivt_non_anom:
     clevs: null
     cmap: cmo.deep
     fig_name_prefix: ar_types_ivt_
-    fname: ERA5/ivt/daily/out.era5*.nc
     name: ivt
     quiver_key: 250
     quiver_key_lbl: 250 kg m$^{-1}$ s$^{-1}$
@@ -167,6 +167,7 @@ ivt_non_anom:
 
 ivt_anom:
     anom: anom
+    varname: ivt
     bnds:
     - 30.0
     - 120.0
@@ -180,7 +181,6 @@ ivt_anom:
     clevs: null
     cmap: cmo.deep
     fig_name_prefix: anom_ar_types_ivt_
-    fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     name: ivt
     quiver_key: 50
     quiver_key_lbl: 50 kg m$^{-1}$ s$^{-1}$
@@ -188,6 +188,7 @@ ivt_anom:
     
 ivt_diff:
     anom: anom
+    varname: ivt
     bnds:
     - 30.0
     - 120.0
@@ -201,7 +202,6 @@ ivt_diff:
     clevs: null
     cmap: BrBG
     fig_name_prefix: non_anom_ivt_diff_
-    fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     name: ivt
     quiver_key: 20
     quiver_key_lbl: 20 kg m$^{-1}$ s$^{-1}$
@@ -210,6 +210,7 @@ ivt_diff:
 # 4) IWV and 850 hPa wind plots
 iwv_diff:
     anom: anom
+    varname: iwv
     bnds:
     - 30.0
     - 120.0
@@ -223,7 +224,6 @@ iwv_diff:
     clevs: null
     cmap: BrBG
     fig_name_prefix: anom_iwv_diff_
-    fname: ERA5/iwv/anomalies/daily_filtered_anomalies_iwv_*.nc
     name: iwv
     quiver_key: 2
     quiver_key_lbl: 2 m s$^{-1}$
@@ -231,6 +231,7 @@ iwv_diff:
 
 lower_diff:
     anom: anom
+    varname: huvq
     bnds:
     - 30.0
     - 120.0
@@ -247,14 +248,14 @@ lower_diff:
     - 2
     cmap: BuPu
     fig_name_prefix: anom_lower_diff_
-    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     lev: 500.0
     name: huv500
     quiver_key: 2
     quiver_key_lbl: 2 m s$^{-1}$
     quiver_scale: 1
     
-## Possible choices for cEOF k-means - a) DJF b) MAM c) DJF-MAM
+
+## Possible choices for seasons - a) DJF b) MAM c) DJFMAM
 djf:
     day_e: '28'
     day_s: '01'
@@ -288,6 +289,5 @@ djfmam:
     ssn: djfmam
     start_date: '1979-12-01 9:00'
     ye: 2019
-    ys: 1979
-    
+    ys: 1979    
 ...

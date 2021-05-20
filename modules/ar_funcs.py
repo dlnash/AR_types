@@ -13,6 +13,30 @@ import pandas as pd
 
 
 ## FUNCTIONS
+def get_topo_mask(regridlats, regridlons):
+    '''
+    Gets topography mask from ETOPO1 data based on regridding (downscaled) lats and lons
+    '''
+    fname = '/home/sbarc/students/nash/data/elevation_data/ETOPO1_Bed_g_gmt4.grd'
+    version = 'bedrock'
+    grid = xr.open_dataset(fname)
+    # Add more metadata and fix some names
+    names = {"ice": "Ice Surface", "bedrock": "Bedrock"}
+    grid = grid.rename(z=version, x="lon", y="lat")
+    grid[version].attrs["long_name"] = "{} relief".format(names[version])
+    grid[version].attrs["units"] = "meters"
+    grid[version].attrs["vertical_datum"] = "sea level"
+    grid[version].attrs["datum"] = "WGS84"
+    grid.attrs["title"] = "ETOPO1 {} Relief".format(names[version])
+    grid.attrs["doi"] = "10.7289/V5C8276M"
+    
+    # select matching domain
+    grid = grid.sel(lat=slice(regridlats.min(), regridlats.max()), lon=slice(regridlons.min(), regridlons.max()))
+
+    # regrid topo to match horizontal resolution
+    regrid_topo = grid.interp(lon=regridlons, lat=regridlats)
+    
+    return regrid_topo
 
 def resample_track_id(df):
     '''
@@ -143,10 +167,8 @@ def preprocess_ar_SASIA(df, thres):
     
     return df
 
-def preprocess_ar_bbox(ds, start_date, end_date, bbox):
-        lat1, lat2, lon1, lon2 = bbox
-        # select lats, lons, and dates within start_date, end_date and months
-        ds = ds.sel(time=slice(start_date, end_date), lat=slice(lat1,lat2), lon=slice(lon1,lon2))
+def preprocess_ar_bbox(ds, start_date, end_date):
+        
         # convert dataset to dataframe
         df = ds.kidmap.to_dataframe(dim_order=['time', 'lat', 'lon'])
         df = df.dropna(axis='rows')
@@ -176,8 +198,8 @@ def preprocess_ar_bbox(ds, start_date, end_date, bbox):
         
         return trackID, ar_dates
         
-def get_ar_days(reanalysis, start_date, end_date, subregions=False, bbox=None, thresh=None):
-    path_to_data = '/home/sbarc/students/nash/data/ar_catalog/'
+def get_ar_days(reanalysis, start_date, end_date, subregions=False, bbox=None, thresh=None, elev_thres=None):
+    path_to_data = '/home/sbarc/students/nash/data/'
     if subregions == True:
         # Open AR dataset (subregions with area covered by AR)
         if reanalysis == 'era5':
@@ -202,11 +224,19 @@ def get_ar_days(reanalysis, start_date, end_date, subregions=False, bbox=None, t
             filename = 'globalARcatalog_MERRA2_1980-2019_v3.0.nc'
 
         # open ds
-        ds = xr.open_dataset(path_to_data + filename, engine='netcdf4')
+        ds = xr.open_dataset(path_to_data + 'ar_catalog/' + filename, chunks={'time': 1460}, engine='netcdf4')
         ds = ds.squeeze()
         # remove lev and ens coords
         ds = ds.reset_coords(names=['lev', 'ens'], drop=True)
-        trackID, ar_dates = preprocess_ar_bbox(ds, start_date, end_date, bbox)
+        
+        # select lats, lons, and dates within start_date, end_date and months
+        lat1, lat2, lon1, lon2 = bbox
+        ds = ds.sel(time=slice(start_date, end_date), lat=slice(lat1,lat2), lon=slice(lon1,lon2))
+        
+        # add topo mask
+        mask = get_topo_mask(ds.lat, ds.lon)
+        ds = ds.where(mask.bedrock >= elev_thres)
+        trackID, ar_dates = preprocess_ar_bbox(ds, start_date, end_date)
 
     return trackID, ar_dates
 

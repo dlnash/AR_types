@@ -1,0 +1,86 @@
+# Filename:    load_era5.yml
+# Author:      Deanna Nash, dlnash@ucsb.edu
+# Description: Configuration arguments for loading ERA5 data.
+
+---
+
+## Possible choices for seasons - a) DJF b) MAM c) DJFMAM
+djf:
+    day_e: '28'
+    day_s: '01'
+    end_date: '2019-02-28 9:00'
+    mon_e: 2
+    mon_s: 12
+    ssn: djf
+    start_date: '1979-12-01 9:00'
+    ye: 2019
+    ys: 1979
+
+# Option 2 - MAM only
+mam:
+    day_e: '31'
+    day_s: '01'
+    end_date: '2019-5-31 9:00'
+    mon_e: 5
+    mon_s: 3
+    ssn: mam
+    start_date: '1979-03-01 9:00'
+    ye: 2019
+    ys: 1979
+
+# Option 3 - DJF and MAM combined
+djfmam:
+    day_e: '31'
+    day_s: '01'
+    end_date: '2019-05-31 9:00'
+    mon_e: 5
+    mon_s: 12
+    ssn: djfmam
+    start_date: '1979-12-01 9:00'
+    ye: 2019
+    ys: 1979
+
+ivt: 
+    p71.162: ivte
+    p72.162: ivtn
+    latitude: lat
+    longitude: lon
+
+huvq:
+    z: H
+    u: U
+    v: V
+    q: QV
+    latitude: lat
+    longitude: lon
+
+prec:
+    mtpr: prec
+    latitude: lat
+    longitude: lon
+
+iwv:
+    latitude: lat
+    longitude: lon
+    
+rename_upper:
+    z: H
+    u: U250
+    v: V250
+    latitude: lat
+    longitude: lon
+
+rename_lower:
+    z: H
+    u: U500
+    v: V500
+    q: QV
+    latitude: lat
+    longitude: lon
+    
+
+
+
+
+
+...

@@ -178,3 +178,30 @@ eof_domain = {'extratropics': [0., 120., 25., 65.],
 
 
 config_dict = [test1, test2, test3, test4, test5, test6]
+
+## dictionaries for renaming variables for loading ERA5 data
+rename_dict_upper = {'z': 'H', 
+                     'u': 'U250', 
+                     'v':'V250', 
+                     'q': 'QV',
+                     'latitude': 'lat',
+                     'longitude': 'lon'}
+
+rename_dict_prec = {'mtpr': 'prec', 
+                    'latitude': 'lat',
+                    'longitude': 'lon'}
+
+rename_dict_iwv = {'latitude': 'lat',
+                    'longitude': 'lon'}
+
+rename_dict_lower = {'z': 'H', 
+                     'u': 'U500', 
+                     'v':'V500', 
+                     'q': 'QV',
+                     'latitude': 'lat',
+                     'longitude': 'lon'}
+
+rename_dict_ivt = {'p71.162': 'ivte', 
+                   'p72.162': 'ivtn', 
+                   'latitude': 'lat',
+                   'longitude': 'lon'}
