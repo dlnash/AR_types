@@ -25,6 +25,7 @@ upper_non_anom:
     fig_name_prefix: ar_types_upper_
     lev: 250.0
     name: huv250
+    fname: ERA5/huvq/daily/out.era5_hma_05dg_daily_huvq_*.nc
     quiver_key: 25
     quiver_key_lbl: 25 m s$^{-1}$
     quiver_scale: 10
@@ -50,6 +51,7 @@ upper_anom:
     fig_name_prefix: anom_ar_types_upper_
     lev: 250.0
     name: huv250
+    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     quiver_key: 10
     quiver_key_lbl: 10 m s$^{-1}$
     quiver_scale: 2
@@ -75,6 +77,7 @@ upper_diff:
     fig_name_prefix: non_anom_upper_diff_
     lev: 250.0
     name: huv250
+    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     quiver_key: 10
     quiver_key_lbl: 10 m s$^{-1}$
     quiver_scale: 2
@@ -97,6 +100,7 @@ precip_non_anom:
     cmap: cmo.rain
     fig_name_prefix: ar_types_prec_
     name: prec
+    fname: ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc
     quiver_key: null
     quiver_key_lbl: null
     quiver_scale: null
@@ -118,6 +122,7 @@ precip_anom:
     cmap: Blues
     fig_name_prefix: anom_ar_types_prec_
     name: prec
+    fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
     quiver_key: null
     quiver_key_lbl: null
     quiver_scale: null
@@ -139,6 +144,7 @@ precip_diff:
     cmap: RdBu_r
     fig_name_prefix: anom_prec_diff_
     name: prec
+    fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
     quiver_key: null
     quiver_key_lbl: null
     quiver_scale: null
@@ -161,6 +167,7 @@ ivt_non_anom:
     cmap: cmo.deep
     fig_name_prefix: ar_types_ivt_
     name: ivt
+    fname: ERA5/ivt/daily/out.era5*.nc
     quiver_key: 250
     quiver_key_lbl: 250 kg m$^{-1}$ s$^{-1}$
     quiver_scale: 50
@@ -182,6 +189,7 @@ ivt_anom:
     cmap: cmo.deep
     fig_name_prefix: anom_ar_types_ivt_
     name: ivt
+    fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     quiver_key: 50
     quiver_key_lbl: 50 kg m$^{-1}$ s$^{-1}$
     quiver_scale: 20
@@ -203,6 +211,7 @@ ivt_diff:
     cmap: BrBG
     fig_name_prefix: non_anom_ivt_diff_
     name: ivt
+    fname: ERA5/ivt/anomalies/daily_filtered_anomalies_*.nc
     quiver_key: 20
     quiver_key_lbl: 20 kg m$^{-1}$ s$^{-1}$
     quiver_scale: 8
@@ -225,6 +234,7 @@ iwv_diff:
     cmap: BrBG
     fig_name_prefix: anom_iwv_diff_
     name: iwv
+    fname: ERA5/iwv/anomalies/daily_filtered_anomalies_iwv_*.nc
     quiver_key: 2
     quiver_key_lbl: 2 m s$^{-1}$
     quiver_scale: 1
@@ -250,6 +260,7 @@ lower_diff:
     fig_name_prefix: anom_lower_diff_
     lev: 500.0
     name: huv500
+    fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
     quiver_key: 2
     quiver_key_lbl: 2 m s$^{-1}$
     quiver_scale: 1

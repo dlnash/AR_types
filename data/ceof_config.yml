@@ -129,13 +129,14 @@ test4:
     
 test5:
     domain:
-    - fulldomain
-    - fulldomain
+    - smalldomain
+    - smalldomain
+    - smalldomain
     fnameID: IVT
     latlon:
-    - 0
-    - 120
-    - 0
+    - 20
+    - 100
+    - 10
     - 50
     levs: []
     name: test5
@@ -144,6 +145,7 @@ test5:
     varlist:
     - ivte
     - ivtn
+    - ivt
 
 test6:
     domain:
@@ -175,38 +177,38 @@ test6:
     
 test7:
     domain:
-    - extenddomain
-    - extenddomain
-    - extenddomain
-    fnameID: HUV500extend
+    - smalldomain
+    - smalldomain
+    - smalldomain
+    fnameID: QUV850
     latlon:
     - 20
-    - 120
-    - 0
+    - 100
+    - 10
     - 50
     levs:
-    - 500.0
+    - 850.0
     name: test7
     pathvar: huvq
     varlev:
-    - 500.0
-    - 500.0
-    - 500.0
+    - 850.0
+    - 850.0
+    - 850.0
     varlist:
-    - H
+    - QV
     - U
     - V
 
 test8:
     domain:
-    - fulldomain
-    - fulldomain
-    - fulldomain
+    - smalldomain
+    - smalldomain
+    - smalldomain
     fnameID: HUV500_10ARSUB
     latlon:
-    - 0
-    - 120
-    - 0
+    - 20
+    - 100
+    - 10
     - 50
     levs:
     - 500.0
@@ -223,14 +225,14 @@ test8:
 
 test9:
     domain:
-    - fulldomain
-    - fulldomain
-    - fulldomain
+    - smalldomain
+    - smalldomain
+    - smalldomain
     fnameID: HUV250
     latlon:
-    - 0
-    - 120
-    - 0
+    - 20
+    - 100
+    - 10
     - 50
     levs:
     - 250.0
@@ -265,6 +267,11 @@ eof_domain:
     - 20.0
     - 120.0
     - 0.0
+    - 50.0
+    smalldomain:
+    - 20.0
+    - 100.0
+    - 10.0
     - 50.0
 
 
