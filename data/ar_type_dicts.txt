@@ -205,3 +205,11 @@ rename_dict_ivt = {'p71.162': 'ivte',
                    'p72.162': 'ivtn', 
                    'latitude': 'lat',
                    'longitude': 'lon'}
+                   
+# subregion info 
+# [ymin, xmin]
+sr_xy = [[65, 30], [75, 25], [85, 20]]
+# width of subregion
+sr_width = [10, 10, 10]
+# height of subregion
+sr_height = [10, 10, 10]

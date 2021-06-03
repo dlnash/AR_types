@@ -7,7 +7,7 @@
 ######################################################################
 
 # Input parameters
-ceofid="HUV500"
+ceofid="IVT"
 ssn="djfmam"
 neofs=2
 nk=3
@@ -17,13 +17,12 @@ finaldir="/home/sbarc/students/nash/repositories/AR_types/figs/final_figs/" # fi
 # fig names in main folder
 array=(
 fig1_elevation_one-minute_with_inset
-fig2_ivt_clim 
+ivt_clim_all_ssn
 fig3_prec_clim 
-prec_clim 
-prec_stddev 
-fig4_variance_elbow_kde 
-fig5_transition_matrix 
-boxplot
+prec_clim
+prec_clim_frac
+prec_std
+composite_climate_indices
 )
 
 array2=(
@@ -32,15 +31,14 @@ array2=(
 3
 S1
 S2
-4
-6
+S3
 S7
 )
 
 for i in ${!array[*]}
 do 
     infile="${maindir}${array[$i]}.png"
-    outfile="${finaldir}f${array2[$i]}.png"
+    outfile="${finaldir}fig${array2[$i]}.png"
 #     echo "${infile} to ${outfile}"
     cp -v ${infile} ${outfile}
 done
@@ -48,7 +46,7 @@ done
 # fig names in mainfol + ceofid + ssn
 maindir="${maindir}${ceofid}/${ssn}/"
 infile="${maindir}spatial_tcor.png"
-outfile="${finaldir}f5.png"
+outfile="${finaldir}fig5.png"
 # echo "${infile} to ${outfile}"
 cp -v ${infile} ${outfile}
 
@@ -58,30 +56,36 @@ array=(
 ARTYPE_freq_barplot
 composite_9pan
 lag0_composite_anomalies_9pan
-composite_diff_TYPE3
-composite_diff_precTYPE3
+composite_diff_ENSO
+composite_diff_AO
 lag2_composite_anomalies_9pan
 lag-2_composite_anomalies_9pan
-composite_climate_indices
-composite_diff_MJO 
+composite_diff_MJO
+fig4_variance_elbow_kde 
+fig5_transition_heatmap 
+boxplot
+composite_diff_SH
 )
 
 array2=(
-S3
+S4
 7
 8
 9
 10
-S4
 S5
 S6
+S9
+4
+6
 S8
+11
 )
 
 for i in ${!array[*]}
 do 
     infile="${maindir}${array[$i]}.png"
-    outfile="${finaldir}f${array2[$i]}.png"
+    outfile="${finaldir}fig${array2[$i]}.png"
 #     echo "${infile} to ${outfile}"
     cp -v ${infile} ${outfile}
 done

@@ -97,7 +97,7 @@ precip_non_anom:
     - 22
     - 2
     clevs: null
-    cmap: cmo.rain
+    cmap: WhiteBlueGreenYellowRed
     fig_name_prefix: ar_types_prec_
     name: prec
     fname: ERA5/prec/daily/out.era5_hma_025dg_daily_prec_*.nc
@@ -116,10 +116,10 @@ precip_anom:
     cb_label: Precipitation (mm day$^{-1}$)
     cflevs:
     - 0
-    - 22
-    - 2
+    - 11
+    - 1
     clevs: null
-    cmap: Blues
+    cmap: WhiteBlueGreenYellowRed
     fig_name_prefix: anom_ar_types_prec_
     name: prec
     fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc
@@ -261,8 +261,8 @@ lower_diff:
     lev: 500.0
     name: huv500
     fname: ERA5/huvq/anomalies/daily_filtered_anomalies_huvq_*.nc
-    quiver_key: 2
-    quiver_key_lbl: 2 m s$^{-1}$
+    quiver_key: 4
+    quiver_key_lbl: 4 m s$^{-1}$
     quiver_scale: 1
     
 

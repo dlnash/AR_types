@@ -272,12 +272,12 @@ def add_ar_time_series(ds, df):
     '''Add AR time series to ds; set as coordinate variables'''
     ds['ar'] = ('time', df.ar)
     ds = ds.set_coords('ar')
-    ds['location'] = ('time', df.location)
-    ds = ds.set_coords('location')
+#     ds['location'] = ('time', df.location)
+#     ds = ds.set_coords('location')
     
     return ds
 
-def calc_seasonal_contribution(ds_list, df, prec_var, mon_s, mon_e):
+def calc_seasonal_contribution(ds_list, df):
     '''
     For a list of ds, calculate the average total seasonal contribution of ARs for the given prec_vars
     
@@ -289,30 +289,26 @@ def calc_seasonal_contribution(ds_list, df, prec_var, mon_s, mon_e):
     for k, ds in enumerate(ds_list):
         # Add AR time series to ds; set as coordinate variables
         ds = add_ar_time_series(ds, df)
-
-        # Select months
-        if mon_s > mon_e:
-            idx = (df.index.month >= mon_s) | (df.index.month <= mon_e)
-        else:
-            idx = (df.index.month >= mon_s) & (df.index.month <= mon_e)
-        ds = ds.sel(time=idx)
         
         # Select AR days
         idx = (ds.ar >= 1)
         ds_ar = ds.sel(time=idx)
 
         # calculate seasonal totals
-        ds_ssn_sum = ds.resample(time='QS-DEC').sum()
-        ds_ar_ssn_sum = ds_ar.resample(time='QS-DEC').sum()                                 
+        ds_ssn_sum = ds.resample(time='QS-DEC', keep_attrs=True).sum()
+        ds_ar_ssn_sum = ds_ar.resample(time='QS-DEC', keep_attrs=True).sum()                                 
 
         # calculate average of seasonal totals
-        ds_clim = ds_ssn_sum.mean(dim='time')
-        ds_ar_clim = ds_ar_ssn_sum.mean(dim='time') 
-
+        clim = ds_ssn_sum.groupby('time.season').mean(dim='time').compute()
+        ds_ar_clim = ds_ar_ssn_sum.groupby('time.season').mean(dim='time').compute()
+        
+        # calculate standard deviation of AR Precip
+        std = ds_ar_ssn_sum.groupby('time.season').std(dim='time').compute()
+        
         # things to output/append to final lists
-        ds_frac_lst.append((ds_ar_clim[prec_var[k]].values/ds_clim[prec_var[k]].values)*100.)
-        ds_std_lst.append(ds_ar_ssn_sum[prec_var[k]].std(dim='time').values)
-        ds_clim_lst.append(ds_clim[prec_var[k]].values)
+        ds_frac_lst.append((ds_ar_clim/clim)*100.)
+        ds_std_lst.append(std)
+        ds_clim_lst.append(clim)
     
     return ds_clim_lst, ds_frac_lst, ds_std_lst
 
@@ -345,3 +341,54 @@ def ar_daily_df(ssn, nk, out_path):
     df_cat['AR_CAT'] = df['AR_CAT']
     
     return df_cat
+
+def duration_stats(x, bins):
+    '''
+    Count number of independent AR events and their duration in days
+    '''
+    duration = x
+    nevents = len(x)
+    duration_freq = np.array(np.unique(duration, return_counts=True))
+
+    sizes = []
+    freq = []
+    for i, b in enumerate(bins):
+        idx = np.where((duration_freq[0] >= b[0]) & (duration_freq[0] < b[1]))
+        sizes.append((duration_freq[1][idx].sum()))
+        freq.append((duration_freq[1][idx].sum()/nevents)*100)
+    
+    return sizes, freq
+
+def calc_seasonal_contribution_ar_mask(ds_list):
+    ## attach ar-mask to ds and use to calculate seasonal precip
+    ar_filename = path_to_data + 'ar_catalog/globalARcatalog_ERA-Interim_1979-2019_v3.0.nc'
+    ar_ds = xr.open_dataset(ar_filename)
+    ar_ds = ar_ds.squeeze()
+    ar_ds = ar_ds.sel(time=slice(start_date, end_date), lat=slice(latmin, latmax), lon=slice(lonmin, lonmax))
+    ar_ds = ar_ds.shape.load()
+    # resample AR catalog to daily
+    ar_ds = ar_ds.resample(time="1D").mean('time')
+
+    clim_lst = []
+    frac = []
+    std_lst = []
+
+    for i, ds in enumerate(ds_lst):
+        # regrid AR catalog to match ds
+        ar_tmp = ar_ds.interp(lon=ds.lon.values, lat=ds.lat.values)
+        print(ar_tmp)
+        # add AR mask to ds prec
+        mask = ds.prec.where(ar_tmp > 0)
+        ds = ds.assign(ar_prec=lambda ds: mask)
+        # sum total precip per season
+        tmp = ds.resample(time='QS-DEC', keep_attrs=True).sum()
+        # Summarize each array into one single (mean) value per season
+        clim = tmp.groupby('time.season').mean(dim='time').compute()
+        clim_lst.append(clim)
+        # Summarize each array into one single (std) value per season
+        std = tmp.groupby('time.season').std(dim='time').compute()
+        std_lst.append(std)
+        # calculate fraction of total seasonal precipitation
+        frac.append((clim.ar_prec/clim.prec)*100)
+        
+    return clim_lst, frac, std_lst

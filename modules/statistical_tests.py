@@ -343,16 +343,9 @@ def diff_proportion_zstat(df):
     enumerates through AR Types and Teleconnections to run z test on difference of proportion
     '''
     AR_CATS = ('AR_CAT1', 'AR_CAT2', 'AR_CAT3', 'AR_ALL')
-    TELE = ['AO', 'PDO', 'ENSO', 'SH']
-    zstat_array1 = []
-    pval_array1 = []
-    
-    zstat_array2 = []
-    pval_array2 = []
-    
-    zstat_array3 = []
-    pval_array3 = []
-    
+    TELE = ['ENSO', 'AO', 'SH', 'PDO', 'MJO']
+    zstat_array = []
+    pval_array = []
     
     for i, tele in enumerate(TELE):
         
@@ -362,44 +355,52 @@ def diff_proportion_zstat(df):
         
         for j, ar_type in enumerate(AR_CATS):
             zstat, pval = test_diff_proportion(s_positive[ar_type].values, s_negative[ar_type].values)
-            zstat_array1.append((zstat))
-            pval_array1.append((pval))
+            zstat_array.append((zstat))
+            pval_array.append((pval))
             
             zstat2, pval2 = test_diff_proportion(s_positive[ar_type].values, s_neutral[ar_type].values)
-            zstat_array2.append((zstat2))
-            pval_array2.append((pval2))
+            zstat_array.append((zstat2))
+            pval_array.append((pval2))
             
             zstat3, pval3 = test_diff_proportion(s_negative[ar_type].values, s_neutral[ar_type].values)
-            zstat_array3.append((zstat3))
-            pval_array3.append((pval3))
-            
-    
-    zstat_final = [zstat_array1, zstat_array2, zstat_array3]
-    pval_final = [pval_array1, pval_array2, pval_array3]
-    return zstat_final, pval_final
+            zstat_array.append((zstat3))
+            pval_array.append((pval3))
+
+    return zstat_array, pval_array
 
 def build_zscore_df(df):
     '''
     Creates a single df with zscore difference of proportion results
     '''
     z, p = diff_proportion_zstat(df)
+    tele = ['El Nino vs. La Nina', 'El Nino vs. Neutral', 'La Nina vs. Neutral']*4 + \
+           ['AO+ vs. AO-', 'AO+ vs. Neutral', 'AO- vs. Neutral']*4 + \
+           ['SH+ vs. SH-', 'SH+ vs. Neutral', 'SH- vs. Neutral']*4 + \
+           ['PDO+ vs. PDO-', 'PDO+ vs. Neutral', 'PDO- vs. Neutral']*4 + \
+           ['MJO vs No MJO', 'MJO vs Neutral', 'No MJO vs Neutral']*4
     
-    arrays = [['AO']*4 + ['PDO']*4 + ['ENSO']*4 + ['SH']*4,
-               ['AR_CAT1', 'AR_CAT2', 'AR_CAT3', 'AR_ALL'] * 4]
+    artype = ['AR Type 1']*3 + ['AR Type 2']*3 + ['AR Type 3']*3 + ['All AR days']*3 + \
+             ['AR Type 1']*3 + ['AR Type 2']*3 + ['AR Type 3']*3 + ['All AR days']*3 + \
+             ['AR Type 1']*3 + ['AR Type 2']*3 + ['AR Type 3']*3 + ['All AR days']*3 + \
+             ['AR Type 1']*3 + ['AR Type 2']*3 + ['AR Type 3']*3 + ['All AR days']*3 + \
+             ['AR Type 1']*3 + ['AR Type 2']*3 + ['AR Type 3']*3 + ['All AR days']*3
     
-    index = pd.MultiIndex.from_arrays(arrays, names=('Teleconnection', 'AR Type'))
-    df_z1 = pd.DataFrame({'zstat': z[0],
-                        'pval': p[0]},
-                       index=index)
-    df_z2 = pd.DataFrame({'zstat': z[1],
-                        'pval': p[1]},
-                       index=index)
-    df_z3 = pd.DataFrame({'zstat': z[2],
-                        'pval': p[2]},
-                       index=index)
+    d = {'teleconnection': tele, 'AR Type': artype, 'zstat': z, 'pval': p}
+    df = pd.DataFrame(data=d)
     
-    df_z = [df_z1, df_z2, df_z3]
-    return df_z
+    # add asterisk based on pvalue
+    df['zstat'] = df['zstat'].round(2).apply(str)
+    mask = (df['pval'] <= 0.05) & (df['pval'] >= 0.01) 
+    mask2 = (df['pval'] <= 0.01)
+
+    df.loc[mask, 'zstat'] = df['zstat']+'*'
+    df.loc[mask2, 'zstat'] = df['zstat']+'**'
+    
+    ztab = df.pivot(index=['teleconnection'], columns='AR Type')['zstat']
+    ptab = df.pivot(index=['teleconnection'], columns='AR Type')['pval']
+    
+    return ztab, ptab
+
 
 def _unequal_var_ttest_denom(v1, n1, v2, n2):
     vn1 = v1 / n1
