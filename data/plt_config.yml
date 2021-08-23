@@ -91,7 +91,7 @@ precip_non_anom:
     - 120.0
     - 10.0
     - 50.0
-    cb_label: Precipitation (mm day$^{-1}$)
+    cb_label: precipitation (mm day$^{-1}$)
     cflevs:
     - 2
     - 22
@@ -113,7 +113,7 @@ precip_anom:
     - 120.0
     - 10.0
     - 50.0
-    cb_label: Precipitation (mm day$^{-1}$)
+    cb_label: precipitation (mm day$^{-1}$)
     cflevs:
     - 0
     - 11
@@ -135,13 +135,13 @@ precip_diff:
     - 120.0
     - 10.0
     - 50.0
-    cb_label: Precipitation (mm day$^{-1}$)
+    cb_label: precipitation (mm day$^{-1}$)
     cflevs:
     - -10
     - 11
     - 1
     clevs: null
-    cmap: RdBu_r
+    cmap: cmo.curl_r
     fig_name_prefix: anom_prec_diff_
     name: prec
     fname: ERA5/prec/anomalies/daily_filtered_anomalies_*.nc

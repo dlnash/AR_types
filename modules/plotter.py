@@ -17,7 +17,7 @@ import colorsys
 from matplotlib.colors import LinearSegmentedColormap # Linear interpolation for color maps
 import matplotlib.patches as mpatches
 
-def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, yticks=None, grid=False, left_lats=True, right_lats=False):
+def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, yticks=None, grid=False, left_lats=True, right_lats=False, bottom_lons=True, mask_ocean=False):
     """
     Creates and returns a background map on which to plot data. 
     
@@ -79,7 +79,9 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
     ax.add_feature(cfeature.LAND, facecolor='0.9')      
     ax.add_feature(cfeature.BORDERS, edgecolor='0.4', linewidth=0.8)
     ax.add_feature(cfeature.COASTLINE, edgecolor='0.4', linewidth=0.8)
-
+    if mask_ocean == True:
+        ax.add_feature(cfeature.OCEAN, edgecolor='0.4', zorder=12, facecolor='white') # mask ocean
+        
     ## Tickmarks/Labels
     ## Add in meridian and parallels
     if mapcrs == ccrs.NorthPolarStereo():
@@ -95,6 +97,7 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
         gl.top_labels = False
         gl.left_labels = left_lats
         gl.right_labels = right_lats
+        gl.bottom_labels = bottom_lons
         gl.xlocator = mticker.FixedLocator(xticks)
         gl.ylocator = mticker.FixedLocator(yticks)
         gl.xformatter = LONGITUDE_FORMATTER

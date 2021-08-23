@@ -543,3 +543,19 @@ def xr_zscore_diff_mean(data1, data2):
     pvalue = _test_diff_means_pval_ufunc(zscore)*2 # Multiplied by two indicates a two tailed testing.
     
     return diff, pvalue
+
+def new_linregress(x, y):
+    # Wrapper around scipy linregress to use in apply_ufunc
+    slope, intercept, r_value, p_value, std_err = linregress(x, y)
+    return np.array([slope, intercept, r_value, p_value, std_err])
+
+def lin_regress(ds, x, y):
+    '''Wrapped scipy.stats.linregress to calculate slope, y-int, r-value, p-value, and standard error in xr.dataset form'''
+    return xr.apply_ufunc(new_linregress, ds[x], ds[y],
+                           input_core_dims=[['time'], ['time']],
+                           output_core_dims=[["parameter"]],
+                           vectorize=True,
+                           dask="parallelized",
+                           output_dtypes=['float64'],
+                           output_sizes={"parameter": 5},
+                      )
