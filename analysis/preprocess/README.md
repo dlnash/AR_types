@@ -1,0 +1,1 @@
+This folder contains the scripts necessary to download 6-hourly ERA5 surface and pressure level variables needed for the analysis, concatenate the files using NCO, and then calculate and write netCDF files of the smoothed, filtered climatology and resulting anomalies for each of the variables.

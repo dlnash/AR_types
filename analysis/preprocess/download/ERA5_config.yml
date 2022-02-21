@@ -1,0 +1,103 @@
+# Filename:    ERA5_config.yml
+# Author:      Deanna Nash, dlnash@ucsb.edu
+# Description: Dictionary of different download variables/options for ERA5 - for use in conjunction with getERA5_batch.py
+
+---
+ivt: 
+    data_type: 'reanalysis-era5-single-levels'
+    levels: None
+    var_name: ['vertical_integral_of_northward_water_vapour_flux', 'vertical_integral_of_eastward_water_vapour_flux']
+    start_yr: 1979
+    end_yr: 2019
+    month: ['01','02','03','04','05','06','07','08','09','10','11','12']
+    day: ['01','02','03','04','05','06', '07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31']
+    time: ['00:00','06:00','12:00','18:00']
+    area: [60, 0, 0, 120] # [N,W,S,E] Default: global
+    grid: [0.5, 0.5]
+    datadir: '/home/sbarc/students/nash/data/ERA5/ivt/6hr/'
+    fprefix: 'era5_hma_05dg_6hr_ivt'
+    
+mslp:
+    data_type: 'reanalysis-era5-single-levels'
+    levels: None
+    var_name: ['mean_sea_level_pressure']
+    start_yr: 1979
+    end_yr: 2019
+    month: ['01','02','03','04','05','06','07','08','09','10','11','12']
+    day: ['01','02','03','04','05','06', '07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31']
+    time: ['00:00','06:00','12:00','18:00']
+    area: [60, 0, 0, 120] # [N,W,S,E] Default: global
+    grid: [0.25, 0.25]
+    datadir: '/home/sbarc/students/nash/data/ERA5/mslp/6hr/'
+    fprefix: "era5_hma_025dg_6hr_mslp"
+    
+prec:
+    data_type: 'reanalysis-era5-single-levels'
+    levels: None
+    var_name: ['mean_total_precipitation_rate']
+    start_yr: 1979
+    end_yr: 2019
+    month: ['01','02','03','04','05','06','07','08','09','10','11','12']
+    day: ['01','02','03','04','05','06', '07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31']
+    time: ['00:00','06:00','12:00','18:00']
+    area: [60, 0, 0, 120] # [N,W,S,E] Default: global
+    grid: [0.25, 0.25]
+    datadir: '/home/sbarc/students/nash/data/ERA5/prec/6hr/'
+    fprefix: "era5_hma_025dg_6hr_prec"
+    
+iwv:
+    data_type: 'reanalysis-era5-single-levels'
+    levels: None
+    var_name: ['total_column_rain_water', 'total_column_snow_water', 'total_column_water', 'total_column_water_vapour']
+    start_yr: 1979
+    end_yr: 2019
+    month: ['01','02','03','04','05','06','07','08','09','10','11','12']
+    day: ['01','02','03','04','05','06', '07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31']
+    time: ['00:00','06:00','12:00','18:00']
+    area: [60, 0, -15, 120] # [N,W,S,E] Default: global
+    grid: [0.5, 0.5]
+    datadir: '/home/sbarc/students/nash/data/ERA5/iwv/6hr/'
+    fprefix: "era5_hma_05dg_6hr_iwv"
+    
+huvq:
+    data_type: 'reanalysis-era5-pressure-levels'
+    var_name: ['geopotential', 'specific_humidity', 'u_component_of_wind', 'v_component_of_wind']
+    levels: ['1000', '850', '500', '250']
+    start_yr: 1979
+    end_yr: 2019
+    month: ['01','02','03','04','05','06','07','08','09','10','11','12']
+    day: ['01','02','03','04','05','06', '07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31']
+    time: ['00:00','06:00','12:00','18:00']
+    area: [60, 0, -15, 120] # [N,W,S,E] Default: global
+    grid: [0.5, 0.5]
+    datadir: '/home/sbarc/students/nash/data/ERA5/huvq/6hr/'
+    fprefix: "era5_hma_05dg_6hr_huvq"
+    
+case_study_201002:
+    data_type: 'reanalysis-era5-pressure-levels'
+    var_name: ['geopotential', 'specific_humidity', 'u_component_of_wind', 'v_component_of_wind']
+    levels: ['300', '350', '400', '450', '500', '550', '600', '650', '700', '750', '775', '800', '825', '850', '875', '900', '925', '950', '975', '1000']
+    start_yr: 2010
+    end_yr: 2010
+    month: ['02']
+    day: ['05','06','07','08','09']
+    time: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00']
+    area: [50, 0, 0, 110] # [N,W,S,E] Default: global
+    grid: [0.25, 0.25]
+    datadir: '/home/sbarc/students/nash/data/ERA5'
+    fprefix: "era5_uvq_prs_201002"
+    
+ivt_case_guan: 
+    data_type: 'reanalysis-era5-single-levels'
+    levels: None
+    var_name: ['vertical_integral_of_northward_water_vapour_flux', 'vertical_integral_of_eastward_water_vapour_flux']
+    start_yr: 2020
+    end_yr: 2021
+    month: ['01','02','12']
+    day: ['01','02','03','04','05','06', '07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31']
+    time: ['00:00','06:00','12:00','18:00']
+    area: [60, 0, 0, 120] # [N,W,S,E] Default: global
+    grid: [1.5, 1.5]
+    datadir: '/home/sbarc/students/nash/data/ERA5/ivt/6hr/'
+    fprefix: 'era5_hma_15dg_6hr_ivt'
+...
