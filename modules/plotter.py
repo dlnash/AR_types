@@ -104,6 +104,13 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
         gl.yformatter = LATITUDE_FORMATTER
         gl.xlabel_style = {'size': 10, 'color': 'gray'}
         gl.ylabel_style = {'size': 10, 'color': 'gray'}
+        
+    # apply tick parameters    
+    ax.tick_params(direction='out', 
+                   labelsize=10, 
+                   length=4, 
+                   pad=2, 
+                   color='black')
     
     ## Gridlines
     # Draw gridlines if requested
@@ -114,13 +121,6 @@ def draw_basemap(ax, datacrs=ccrs.PlateCarree(), extent=None, xticks=None, ytick
         gl.xlines = False
         gl.ylines = False
             
-
-    # apply tick parameters    
-    ax.tick_params(direction='out', 
-                   labelsize=10, 
-                   length=4, 
-                   pad=2, 
-                   color='black')
     
     return ax
 
